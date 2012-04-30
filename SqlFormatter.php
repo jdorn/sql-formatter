@@ -178,6 +178,7 @@ class SqlFormatter {
 				case 'special reserved':
 					$newline = true;
 					if(!$first && !$has_newline) $return .= "\n".str_repeat($tab,$indent? $indent-1 : 0);
+					elseif(!$first) $return = substr($return,0,-1*(strlen($tab)));
 					$return .= "<span style='font-weight:bold;'>".$next_token."</span> ";
 					break;
 				case '(':
