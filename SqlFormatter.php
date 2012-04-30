@@ -32,7 +32,7 @@ class SqlFormatter {
 		'SELECT','FROM','WHERE','SET','ORDER BY','GROUP BY','LEFT JOIN','OUTER JOIN','INNER JOIN','RIGHT JOIN','JOIN','LIMIT'
 	 );
 	 
-	 private static $boundaries = array(',',' ',';',"\t","\n","\r",')','(');
+	 private static $boundaries = array(',',' ',';',"\t","\n","\r",')','(','.');
 	 
 	 private static $reserved_sorted;
 
@@ -56,7 +56,7 @@ class SqlFormatter {
 			return substr($string,0,$i+1);
 		}
 		//separators
-		elseif(in_array($string[0],array('(',')',',',';'))) {
+		elseif(in_array($string[0],array('(',')',',',';','.'))) {
 			//if it is a simple string or empty between the parentheses, just count as a word
 			//this makes it so we don't split things like NOW() or COUNT(*) into separate lines
 			if($string[0] === '(') {
