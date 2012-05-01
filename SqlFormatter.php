@@ -26,20 +26,25 @@ class SqlFormatter {
 		'STRAIGHT_JOIN', 'STRING', 'STRIPED', 'SUPER', 'TABLE', 'TABLES', 'TEMPORARY', 'TERMINATED', 'THEN', 'TO', 'TRAILING', 'TRANSACTIONAL',    
 		'TRUNCATE', 'TYPE', 'TYPES', 'UNCOMMITTED', 'UNION', 'UNIQUE', 'UNLOCK', 'UPDATE', 'USAGE', 'USE', 'USING', 'VALUES', 'VARIABLES',
 		'VIEW', 'WHEN', 'WHERE', 'WITH', 'WORK', 'WRITE', 'XOR', 'YEAR_MONTH'
-	 );
-	 
-	 private static $special_reserved = array(
+	);
+	
+	private static $special_reserved = array(
 		'SELECT','FROM','WHERE','SET','ORDER BY','GROUP BY','LEFT JOIN','OUTER JOIN','INNER JOIN','RIGHT JOIN','JOIN','LIMIT'
-	 );
-	 
-	 private static $boundaries = array(',',' ',';',"\t","\n","\r",')','(','.');
-	 
-	 private static $reserved_sorted;
+	);
+	
+	private static $boundaries = array(',',';',')','(','.');
+
+	private static $whitespace = array(' ',"\n","\t","\r");
+	
+	private static $quotes = array('"',"'",'`');
+
+	//this flag tells us if the reserved word list is sorted already
+	private static $reserved_sorted;
 
 
 	protected static function getNextToken($string,&$type) {
 		//if the next item is a string
-		if(in_array($string[0],array('"',"'",'`'))) {
+		if(in_array($string[0],self::$quotes)) {
 			$quote = $string[0];
 			for($i=1;$i<strlen($string);$i++) {
 				//escaped (either backslash or backtick escaped)
@@ -56,7 +61,7 @@ class SqlFormatter {
 			return substr($string,0,$i+1);
 		}
 		//separators
-		elseif(in_array($string[0],array('(',')',',',';','.'))) {
+		elseif(in_array($string[0],self::$boundaries)) {
 			//if it is a simple string or empty between the parentheses, just count as a word
 			//this makes it so we don't split things like NOW() or COUNT(*) into separate lines
 			if($string[0] === '(') {
@@ -83,9 +88,15 @@ class SqlFormatter {
 			return $string[0];
 		}
 		//space
-		elseif(in_array($string[0],array(' ',"\t","\n","\r"))) {
+		elseif(in_array($string[0],self::$whitespace)) {
+			for($i=1;$i<strlen($string);$i++) {
+				if(!in_array($string[$i],self::$whitespace)) {
+					break;
+				}
+			}
+		
 			$type = 'whitespace';
-			return $string[0];
+			return substr($string,0,$i);
 		}
 		
 		//sort reserved word list from longest word to shortest
@@ -96,12 +107,14 @@ class SqlFormatter {
 			self::$reserved_sorted = true;
 		}
 		
+		$all_boundaries = array_merge(self::$boundaries, self::$whitespace);
+		
 		//reserved word
 		$test = strtoupper($string);
 		foreach(self::$reserved as $word) {
 			//if(strlen($test < strlen($word))) continue;
 			if(substr($test,0,strlen($word)) === $word) {
-				if(!in_array($string[strlen($word)],self::$boundaries)) continue;
+				if(!in_array($string[strlen($word)],$all_boundaries)) continue;
 			
 				if(in_array($word,self::$special_reserved)) $type = 'special reserved';
 				else $type = 'reserved';
@@ -112,7 +125,7 @@ class SqlFormatter {
 		
 		//look for first word separator
 		for($i=1;$i<strlen($string);$i++) {	
-			if(in_array($string[$i],self::$boundaries)) {
+			if(in_array($string[$i],$all_boundaries)) {
 				break;
 			}
 		}
@@ -146,11 +159,12 @@ class SqlFormatter {
 			
 			//get the next token and the token type
 			$type = null;
-			$next_token = self::getNextToken($string,$type);
+			$raw_token = self::getNextToken($string,$type);
+			$next_token = htmlentities($raw_token);
 			
 			//don't process whitespace
 			if($type === 'whitespace') {
-				$string = substr($string,1);
+				$string = substr($string,strlen($raw_token));
 				continue;
 			}
 			
@@ -204,7 +218,7 @@ class SqlFormatter {
 			}
 			
 			//advance the string forward
-			$string = substr($string,strlen($next_token));
+			$string = substr($string,strlen($raw_token));
 			$first = false;
 		}
 		
