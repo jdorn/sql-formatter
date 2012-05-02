@@ -87,7 +87,7 @@ class SqlFormatter {
 			$type = $string[0];
 			return $string[0];
 		}
-		//space
+		//whitespace
 		elseif(in_array($string[0],self::$whitespace)) {
 			for($i=1;$i<strlen($string);$i++) {
 				if(!in_array($string[$i],self::$whitespace)) {
@@ -114,7 +114,7 @@ class SqlFormatter {
 		foreach(self::$reserved as $word) {
 			//if(strlen($test < strlen($word))) continue;
 			if(substr($test,0,strlen($word)) === $word) {
-				if(!in_array($string[strlen($word)],$all_boundaries)) continue;
+				if(isset($string[strlen($word)]) && !in_array($string[strlen($word)],$all_boundaries)) continue;
 			
 				if(in_array($word,self::$special_reserved)) $type = 'special reserved';
 				else $type = 'reserved';
