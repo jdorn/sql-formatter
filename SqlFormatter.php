@@ -8,7 +8,7 @@ class SqlFormatter {
 		'DAY_SECOND', 'DEFINER', 'DELAYED', 'DELAY_KEY_WRITE', 'DELETE', 'DESC', 'DESCRIBE', 'DETERMINISTIC', 'DISTINCT', 'DISTINCTROW', 'DIV',
 		'DO', 'DROP', 'DUMPFILE', 'DUPLICATE', 'DYNAMIC', 'ELSE', 'ENCLOSED', 'END', 'ENGINE', 'ENGINES', 'ESCAPE', 'ESCAPED', 'EVENTS', 'EXECUTE',
 		'EXISTS', 'EXPLAIN', 'EXTENDED', 'FAST', 'FIELDS', 'FILE', 'FIRST', 'FIXED', 'FLUSH', 'FOR', 'FORCE', 'FOREIGN', 'FROM', 'FULL', 'FULLTEXT',
-		'FUNCTION', 'GEMINI', 'GEMINI_SPIN_RETRIES', 'GLOBAL', 'GRANT', 'GRANTS', 'GROUP', 'GROUP BY', 'HAVING', 'HEAP', 'HIGH_PRIORITY', 'HOSTS', 'HOUR', 'HOUR_MINUTE',
+		'FUNCTION', 'GEMINI', 'GEMINI_SPIN_RETRIES', 'GLOBAL', 'GRANT', 'GRANTS', 'GROUP', 'GROUP_CONCAT', 'GROUP BY', 'HAVING', 'HEAP', 'HIGH_PRIORITY', 'HOSTS', 'HOUR', 'HOUR_MINUTE',
 		'HOUR_SECOND', 'IDENTIFIED', 'IF', 'IGNORE', 'IN', 'INDEX', 'INDEXES', 'INFILE', 'INNER', 'INNER JOIN', 'INSERT', 'INSERT_ID', 'INSERT_METHOD', 'INTERVAL',
 		'INTO', 'INVOKER', 'IS', 'ISOLATION', 'JOIN', 'KEY', 'KEYS', 'KILL', 'LAST_INSERT_ID', 'LEADING', 'LEFT', 'LEFT JOIN', 'LEVEL', 'LIKE', 'LIMIT', 'LINEAR',               
 		'LINES', 'LOAD', 'LOCAL', 'LOCK', 'LOCKS', 'LOGS', 'LOW_PRIORITY', 'MARIA', 'MASTER', 'MASTER_CONNECT_RETRY', 'MASTER_HOST', 'MASTER_LOG_FILE',
@@ -29,18 +29,26 @@ class SqlFormatter {
 	);
 	
 	private static $special_reserved = array(
-		'SELECT','FROM','WHERE','SET','ORDER BY','GROUP BY','LEFT JOIN','OUTER JOIN','INNER JOIN','RIGHT JOIN','JOIN','LIMIT'
+		'SELECT','FROM','WHERE','SET','ORDER BY','GROUP BY','LEFT JOIN','OUTER JOIN','INNER JOIN','RIGHT JOIN','JOIN','LIMIT','VALUES'
 	);
 	
-	private static $boundaries = array(',',';',')','(','.');
+	private static $boundaries = array(',',';',')','(','.','=','<','>','+','-','*','/');
 
 	private static $whitespace = array(' ',"\n","\t","\r");
 	
 	private static $quotes = array('"',"'",'`');
+	
+	public static $quote_style = 'color: blue;';
+	public static $backtick_quote_style = 'color: purple;';
+	public static $reserved_style = 'color:black; font-weight:bold;';
+	public static $boundary_style = 'color:black;';
+	public static $number_style = 'color: green;';
+	public static $default_style = 'color: #333;';
+	public static $error_style = 'background-color; red; color: black;';
+	
 
 	//this flag tells us if the reserved word list is sorted already
 	private static $reserved_sorted;
-
 
 	protected static function getNextToken($string,&$type) {
 		//if the next item is a string
@@ -72,19 +80,31 @@ class SqlFormatter {
 				$type2 = null;
 				$next_token = self::getNextToken(substr($string,1),$type2);
 				if($string[strlen($next_token)+1] === ')') {
-					if($type2 === 'word') {
-						$type = 'word';
-						return '('.$next_token.')';
-					}
-					elseif($type2 === 'whitespace') {
+					if(in_array($type2,array('word','whitespace','boundary'))) {
 						$type = 'word';
 						return '('.$next_token.')';
 					}
 				}
 			}
+			
+			if(in_array($string[0],array('(',')'))) {
+				$type = $string[0];
+				return $string[0];
+			}
+			
+			$type2 = null;
+			$next_token = self::getNextToken(substr($string,1),$type2);
+			
+			//if there are 1 or more boundary characters together, return as a single word
+			if($type2 === 'boundary') {
+				$type = 'boundary';
+				return $string[0] . $next_token;
+			}
 		
-		
-			$type = $string[0];
+			//otherwise, just return the single boundary character
+			if(in_array($string[0],array('.',','))) $type = $string[0];
+			else $type = 'boundary';
+			
 			return $string[0];
 		}
 		//whitespace
@@ -162,64 +182,80 @@ class SqlFormatter {
 			$raw_token = self::getNextToken($string,$type);
 			$next_token = htmlentities($raw_token);
 			
+			//advance the string forward
+			$string = substr($string,strlen($raw_token));
+			
 			//don't process whitespace
 			if($type === 'whitespace') {
-				$string = substr($string,strlen($raw_token));
 				continue;
 			}
 			
-			//if the previous token requires a newline following it
-			if($newline) {
+			//the first non-whitespace token
+			$first = false;
+			
+			//if this token decreases the indent level
+			if(in_array($type,array('special reserved',')'))) {
+				if($indent)
+					$indent--;
+				else {
+					$return .= '<span style="'.self::$error_style.'">'.$next_token.'</span> ';
+					continue;
+				}
+			}
+			
+			//if we need a new line before the token
+			if(!$first && ($newline || in_array($type,array(')','special reserved')))) {
 				$newline = false;
-				$has_newline = true;
 				$return .= "\n".str_repeat($tab,$indent);
 			}
-			else {
-				$has_newline = false;
+			
+			//if we need a new line after the token
+			if(in_array($type,array(',','(','special reserved'))) {
+				$newline = true;
+			}			
+			
+			//if this token increases the indent level
+			if(in_array($type,array('special reserved','('))) {
+				$indent++;
 			}
 			
 			switch($type) {
 				case 'backtick quote':
-					$return .= "<span style='color:purple;'>".$next_token."</span> ";
+					$return .= "<span style='".self::$backtick_quote_style."'>".$next_token."</span> ";
 					break;
 				case 'quote':
-					$return .= "<span style='color:blue;'>".$next_token."</span> ";
+					$return .= "<span style='".self::$quote_style."'>".$next_token."</span> ";
 					break;
 				case 'reserved':
-					$return .= "<span style='font-weight:bold;'>".$next_token."</span> ";
-					break;
-				//these are reserved words that are on their own line
 				case 'special reserved':
-					$newline = true;
-					if(!$first && !$has_newline) $return .= "\n".str_repeat($tab,$indent? $indent-1 : 0);
-					elseif(!$first) $return = substr($return,0,-1*(strlen($tab)));
-					$return .= "<span style='font-weight:bold;'>".$next_token."</span> ";
+					$return .= "<span style='".self::$reserved_style."'>".$next_token."</span> ";
 					break;
 				case '(':
-					$indent++;
-					$newline = true;
 					$return .= '(';
 					break;
 				case ')':
-					if($indent > 1) {
-						$indent--;
-						$return .= "\n".str_repeat($tab,$indent).") ";
-					}
-					//unmatching parentheses
-					else {
-						$return .= "\n".str_repeat($tab,$indent)."<span style='background:red; color:black; font-weight:bold;'>)</span> ";
-					}
+					$return .= ") ";
 					break;
 				case 'number':
-					$return .= "<span style='color: green;'>".$next_token."</span> ";
+					$return .= "<span style='".self::$number_style."'>".$next_token."</span> ";
+					break;
+				case 'boundary':
+				case '.':
+				case ',':
+					if(in_array($next_token,array('.',','))) {
+						$return = rtrim($return,' ');
+					}
+				
+					$return .= "<span style='".self::$boundary_style."'>".$next_token."</span> ";
+					
+					if(in_array($next_token,array('.'))) {
+						$return = rtrim($return,' ');
+					}
+					
 					break;
 				default:
-					$return .= "<span style='color: #555;'>".$next_token."</span> ";
+					$return .= "<span style='".self::$default_style."'>".$next_token."</span> ";
 			}
-			
-			//advance the string forward
-			$string = substr($string,strlen($raw_token));
-			$first = false;
 		}
 		
 		//if there are unmatched parentheses
