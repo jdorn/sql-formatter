@@ -30,3 +30,7 @@ Sample usage:
     
     echo SqlFormatter::format("SELECT * FROM Table LIMIT 10");
     ?>
+
+Sample output:
+
+![](http://github.com/jdorn/sql-formatter/raw/master/examples/SqlFormatterExample.png)
