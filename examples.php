@@ -16,6 +16,8 @@ $statements = array(
 	"UPDATE MyTable SET name='sql', category='databases' WHERE id > '65'",
 	
 	"delete from MyTable WHERE name LIKE \"test%\"",
+	
+	"SELECT * FROM UnmatchedParens WHERE ( A = B)) AND (((Test=1)"
 );
 
 foreach($statements as $sql) {

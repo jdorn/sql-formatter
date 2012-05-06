@@ -29,7 +29,7 @@ class SqlFormatter {
 	);
 	
 	private static $special_reserved = array(
-		'SELECT','FROM','WHERE','SET','ORDER BY','GROUP BY','LEFT JOIN','OUTER JOIN','INNER JOIN','RIGHT JOIN','JOIN','LIMIT','VALUES'
+		'SELECT','FROM','WHERE','SET','ORDER BY','GROUP BY','LEFT JOIN','OUTER JOIN','INNER JOIN','RIGHT JOIN','JOIN','LIMIT','VALUES','UPDATE'
 	);
 	
 	private static $boundaries = array(',',';',')','(','.','=','<','>','+','-','*','/');
@@ -44,7 +44,7 @@ class SqlFormatter {
 	public static $boundary_style = 'color:black;';
 	public static $number_style = 'color: green;';
 	public static $default_style = 'color: #333;';
-	public static $error_style = 'background-color; red; color: black;';
+	public static $error_style = 'background-color: red; color: black;';
 	
 
 	//this flag tells us if the reserved word list is sorted already
@@ -166,6 +166,8 @@ class SqlFormatter {
 		$i = 0;
 		$indent = 1;
 		$newline = false;
+		$indented = false;
+		$extra_indent = 0;
 		$first = true;
 		$old_string_len = strlen($string) + 1;
 		
@@ -195,8 +197,17 @@ class SqlFormatter {
 			
 			//if this token decreases the indent level
 			if(in_array($type,array('special reserved',')'))) {
-				if($indent)
+				if($indented) {
+					$extra_indent ++;
+				}
+				elseif($indent && ($type==='special reserved' || $indent>1)) {
 					$indent--;
+					
+					if($type === ')' && $extra_indent) {
+						$indent -= $extra_indent;
+						$extra_indent = 0;
+					}
+				}
 				else {
 					$return .= '<span style="'.self::$error_style.'">'.$next_token.'</span> ';
 					continue;
@@ -204,7 +215,7 @@ class SqlFormatter {
 			}
 			
 			//if we need a new line before the token
-			if(!$first && ($newline || in_array($type,array(')','special reserved')))) {
+			if($newline || in_array($type,array(')','special reserved'))) {
 				$newline = false;
 				$return .= "\n".str_repeat($tab,$indent);
 			}
@@ -217,6 +228,10 @@ class SqlFormatter {
 			//if this token increases the indent level
 			if(in_array($type,array('special reserved','('))) {
 				$indent++;
+				$indented = true;
+			}
+			else {
+				$indented = false;
 			}
 			
 			switch($type) {
@@ -242,7 +257,7 @@ class SqlFormatter {
 				case 'boundary':
 				case '.':
 				case ',':
-					if(in_array($next_token,array('.',','))) {
+					if(in_array($next_token,array('.',',',';'))) {
 						$return = rtrim($return,' ');
 					}
 				
@@ -263,7 +278,7 @@ class SqlFormatter {
 			$return .= "\n<span style='color:red;'>WARNING: unmatched parentheses</span>";
 		}
 		
-		return "<pre style='background:white;'>".$return."</pre>";
+		return "<pre style='background:white;'>".trim($return)."</pre>";
 	}
 }
 ?>
