@@ -1,5 +1,5 @@
 <?php
-require_once('SqlFormatter.php');
+require_once('../SqlFormatter.php');
 
 $statements = array(
 	"SELECT * FROM MyTable WHERE id = 46",
@@ -17,7 +17,14 @@ $statements = array(
 	
 	"delete from MyTable WHERE name LIKE \"test%\"",
 	
-	"SELECT * FROM UnmatchedParens WHERE ( A = B)) AND (((Test=1)"
+	"SELECT * FROM UnmatchedParens WHERE ( A = B)) AND (((Test=1)",
+	
+	"-- This is a comment
+	SELECT
+	/* This is another comment
+	On more than one line */ 
+	Id #This is one final comment
+	as temp, DateCreated as Created FROM MyTable;",
 );
 
 foreach($statements as $sql) {
