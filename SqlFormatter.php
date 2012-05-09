@@ -45,16 +45,36 @@ class SqlFormatter {
 	public static $number_style = 'color: green;';
 	public static $default_style = 'color: #333;';
 	public static $error_style = 'background-color: red; color: black;';
+	public static $comment_style = 'color: #aaa;';
+	
+	public static $tab = '&nbsp;&nbsp;';
 	
 
 	//this flag tells us if the reserved word list is sorted already
 	private static $reserved_sorted;
 
 	protected static function getNextToken($string,&$type) {
+		//if the next token is a comment
+		if(substr($string,0,2)==='--' || $string[0] === '#' || substr($string,0,2)==='/*') {
+			
+			//comment until end of line
+			if(in_array($string[0],array('-','#'))) {
+				$last = strpos($string,"\n");
+				$type = 'comment';
+			}
+			//comment until closing comment tag
+			else {
+				$last = strpos($string,"*/",2)+2;
+				$type = 'block comment';
+			}
+			
+			return substr($string,0,$last);
+		}
+	
 		//if the next item is a string
 		if(in_array($string[0],self::$quotes)) {
 			$quote = $string[0];
-			for($i=1;$i<strlen($string);$i++) {
+			for($i=1;$i< strlen($string);$i++) {
 				//escaped (either backslash or backtick escaped)
 				if(($quote != '`' && $string[$i] === '\\') || ($quote === '`' && $string[$i] === '`' && $string[$i+1] === '`')) {
 					$i++;
@@ -109,7 +129,7 @@ class SqlFormatter {
 		}
 		//whitespace
 		elseif(in_array($string[0],self::$whitespace)) {
-			for($i=1;$i<strlen($string);$i++) {
+			for($i=1;$i< strlen($string);$i++) {
 				if(!in_array($string[$i],self::$whitespace)) {
 					break;
 				}
@@ -144,7 +164,7 @@ class SqlFormatter {
 		}
 		
 		//look for first word separator
-		for($i=1;$i<strlen($string);$i++) {	
+		for($i=1;$i< strlen($string);$i++) {	
 			if(in_array($string[$i],$all_boundaries)) {
 				break;
 			}
@@ -160,7 +180,7 @@ class SqlFormatter {
 		$return = '';
 	
 		//configuration values
-		$tab = "&nbsp;&nbsp;";
+		$tab = self::$tab;
 	
 		//starting values
 		$i = 0;
@@ -168,7 +188,6 @@ class SqlFormatter {
 		$newline = false;
 		$indented = false;
 		$extra_indent = 0;
-		$first = true;
 		$old_string_len = strlen($string) + 1;
 		
 		//keep processing the string until it is empty
@@ -192,8 +211,16 @@ class SqlFormatter {
 				continue;
 			}
 			
-			//the first non-whitespace token
-			$first = false;
+			//display comments directly where they appear in the source
+			elseif(in_array($type,array('comment','block comment'))) {
+				if($type === 'block comment') {
+					$return .= "\n".str_repeat($tab,$indent);
+				}
+			
+				$return .= '<span style="'.self::$comment_style.'">'.$next_token.'</span> ';
+				$newline = true;
+				continue;
+			}
 			
 			//if this token decreases the indent level
 			if(in_array($type,array('special reserved',')'))) {
@@ -234,7 +261,7 @@ class SqlFormatter {
 				$indented = false;
 			}
 			
-			switch($type) {
+			switch($type) {	
 				case 'backtick quote':
 					$return .= "<span style='".self::$backtick_quote_style."'>".$next_token."</span> ";
 					break;
