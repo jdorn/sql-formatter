@@ -27,8 +27,15 @@ $statements = array(
 	as temp, DateCreated as Created FROM MyTable;",
 );
 
+echo "<h1>Formatting</h1>";
 foreach($statements as $sql) {
 	echo "<hr />";
 	echo SqlFormatter::format($sql);
+}
+
+echo "<h1>Syntax Highlighting Only</h1>";
+foreach($statements as $sql) {
+	echo "<hr />";
+	echo SqlFormatter::highlight($sql);
 }
 ?>

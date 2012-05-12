@@ -28,9 +28,22 @@ Sample usage:
     <?php
     require_once('SqlFormatter.php');
     
-    echo SqlFormatter::format("SELECT * FROM Table LIMIT 10");
+    echo SqlFormatter::format("SELECT * FROM MyTable LIMIT 10");
     ?>
 
 Sample output:
 
 ![](http://github.com/jdorn/sql-formatter/raw/master/examples/SqlFormatterExample.png)
+
+Syntax Highlighting Only
+-------------------------
+
+There is also a static method 'highlight' that only does syntax highlighting 
+and preserves all original whitespace.
+
+This is useful for sql that is already well formatted and just needs to be a little
+easier to read.
+
+    <?php
+    echo SqlFormatter::highlight("SELECT * FROM MyTable LIMIT 10");
+    ?>

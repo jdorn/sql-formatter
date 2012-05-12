@@ -307,5 +307,62 @@ class SqlFormatter {
 		
 		return "<pre style='background:white;'>".trim($return)."</pre>";
 	}
+	
+	public static function highlight($string) {
+		$old_string_len = strlen($string) + 1;
+		
+		//keep processing the string until it is empty
+		while(strlen($string)) {
+			//if the string stopped shrinking, there was a problem
+			if($old_string_len <= strlen($string)) {
+				throw new Exception("SQL PARSE ERROR");
+			}
+			$old_string_len = strlen($string);
+			
+			//get the next token and the token type
+			$type = null;
+			$raw_token = self::getNextToken($string,$type);
+			$next_token = htmlentities($raw_token);
+			
+			//advance the string forward
+			$string = substr($string,strlen($raw_token));
+			
+			switch($type) {
+				case 'backtick quote':
+					$return .= "<span style='".self::$backtick_quote_style."'>".$next_token."</span>";
+					break;
+				case 'quote':
+					$return .= "<span style='".self::$quote_style."'>".$next_token."</span>";
+					break;
+				case 'reserved':
+				case 'special reserved':
+					$return .= "<span style='".self::$reserved_style."'>".$next_token."</span>";
+					break;
+				case '(':
+					$return .= '(';
+					break;
+				case ')':
+					$return .= ")";
+					break;
+				case 'number':
+					$return .= "<span style='".self::$number_style."'>".$next_token."</span>";
+					break;
+				case 'boundary':
+				case '.':
+				case ',':				
+					$return .= "<span style='".self::$boundary_style."'>".$next_token."</span>";					
+					break;
+				case 'comment':
+				case 'block comment':
+					$return .= "<span style='".self::$comment_style."'>".$next_token."</span>";
+					break;
+				default:
+					$return .= "<span style='".self::$default_style."'>".$next_token."</span>";
+			}
+		}
+		
+		return "<pre style='background:white;'>".trim($return)."</pre>";
+			
+	}
 }
 ?>
