@@ -29,7 +29,7 @@ class SqlFormatter {
 	);
 	
 	private static $special_reserved = array(
-		'SELECT','FROM','WHERE','SET','ORDER BY','GROUP BY','LEFT JOIN','OUTER JOIN','INNER JOIN','RIGHT JOIN','JOIN','LIMIT','VALUES','UPDATE'
+		'SELECT','FROM','WHERE','SET','ORDER BY','GROUP BY','LEFT JOIN','OUTER JOIN','INNER JOIN','RIGHT JOIN','JOIN','LIMIT','VALUES','UPDATE','HAVING'
 	);
 	
 	private static $boundaries = array(',',';',')','(','.','=','<','>','+','-','*','/');
