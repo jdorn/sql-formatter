@@ -362,7 +362,47 @@ class SqlFormatter {
 		}
 		
 		return "<pre style='background:white;'>".trim($return)."</pre>";
+	}
+	
+	public static function splitQuery($string) {
+		$queries = array();
+		
+		$current_query = '';
+		
+		$old_string_len = strlen($string) + 1;
+		
+		//keep processing the string until it is empty
+		while(strlen($string)) {
+			//if the string stopped shrinking, there was a problem
+			if($old_string_len <= strlen($string)) {
+				throw new Exception("SQL PARSE ERROR");
+			}
+			$old_string_len = strlen($string);
 			
+			//get the next token and the token type
+			$type = null;
+			$raw_token = self::getNextToken($string,$type);
+			$next_token = htmlentities($raw_token);
+			
+			//advance the string forward
+			$string = substr($string,strlen($raw_token));
+			
+			//if this is a query separator
+			if($next_token === ';') {
+				if(trim($current_query)) $queries[] = $current_query;
+				$current_query = '';
+				continue;
+			}
+			
+			$current_query .= $next_token;
+		}
+		
+		if(trim($current_query)) {
+			$queries[] = $current_query;
+		}
+		
+		
+		return $queries;
 	}
 }
 ?>
