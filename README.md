@@ -25,11 +25,12 @@ as input and returns a formatted HTML block inside a pre tag.
 
 Sample usage:
 
-    <?php
-    require_once('SqlFormatter.php');
-    
-    echo SqlFormatter::format("SELECT * FROM MyTable LIMIT 10");
-    ?>
+```php
+<?php
+require_once('SqlFormatter.php');
+
+echo SqlFormatter::format("SELECT * FROM MyTable LIMIT 10");
+```
 
 Sample output:
 
@@ -44,6 +45,43 @@ and preserves all original whitespace.
 This is useful for sql that is already well formatted and just needs to be a little
 easier to read.
 
-    <?php
-    echo SqlFormatter::highlight("SELECT * FROM MyTable LIMIT 10");
-    ?>
+```php
+<?php
+echo SqlFormatter::highlight("SELECT * FROM MyTable LIMIT 10");
+```
+
+Split SQL String into Queries
+--------------------------
+
+Another feature, which is unrelated to formatting, is the ability to break up a SQL string into multiple queries.  
+
+For Example:
+
+```sql
+DROP TABLE IF EXISTS MyTable;
+CREATE TABLE MyTable ( id int );
+INSERT INTO MyTable	(id)
+	VALUES
+	(1),(2),(3),(4);
+SELECT * FROM MyTable;
+```
+
+```php
+$queries = SqlFormatter::splitQuery($sql);
+```
+$queries is now an array of the 4 queries without trailing semicolons.
+
+Why not just use explode(';',$sql) or regular expressions?  The following example sql and others like it
+are impossible to split correctly using regular expressions.
+
+```sql
+SELECT ";"; SELECT ";\"; a;";
+SELECT ";
+    abc";
+SELECT a,b #comment;
+FROM test;
+```
+
+The splitQuery method will still fail in the following cases:
+*    The DELIMITER command can be used to change the delimiter from the default ';' to something else.  
+*    The CREATE PROCEDURE command

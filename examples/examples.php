@@ -38,4 +38,31 @@ foreach($statements as $sql) {
 	echo "<hr />";
 	echo SqlFormatter::highlight($sql);
 }
+
+
+$split_statements = array(
+	'DROP TABLE IF EXISTS MyTable;
+	CREATE TABLE MyTable ( id int );
+	INSERT INTO MyTable	(id)
+		VALUES
+		(1),(2),(3),(4);
+	SELECT * FROM MyTable;',
+
+	'SELECT ";"; SELECT ";\"; a;";
+	SELECT ";
+		abc";
+	SELECT a,b #comment;
+	FROM test;'
+);
+
+echo "<h1>Splitting Queries</h1>";
+foreach($split_statements as $sql) {
+	echo "<hr />";
+	$queries = SqlFormatter::splitQuery($sql);
+	echo "<ol>";
+	foreach($queries as $query) {
+		echo "<li>".SqlFormatter::highlight($query)."</li>";
+	}
+	echo "</ol>";
+}
 ?>

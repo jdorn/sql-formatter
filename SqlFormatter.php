@@ -311,6 +311,8 @@ class SqlFormatter {
 	public static function highlight($string) {
 		$old_string_len = strlen($string) + 1;
 		
+		$return = '';
+		
 		//keep processing the string until it is empty
 		while(strlen($string)) {
 			//if the string stopped shrinking, there was a problem
@@ -382,14 +384,14 @@ class SqlFormatter {
 			//get the next token and the token type
 			$type = null;
 			$raw_token = self::getNextToken($string,$type);
-			$next_token = htmlentities($raw_token);
+			$next_token = $raw_token;
 			
 			//advance the string forward
 			$string = substr($string,strlen($raw_token));
 			
 			//if this is a query separator
 			if($next_token === ';') {
-				if(trim($current_query)) $queries[] = $current_query;
+				if(trim($current_query)) $queries[] = trim($current_query);
 				$current_query = '';
 				continue;
 			}
@@ -398,7 +400,7 @@ class SqlFormatter {
 		}
 		
 		if(trim($current_query)) {
-			$queries[] = $current_query;
+			$queries[] = trim($current_query);
 		}
 		
 		
