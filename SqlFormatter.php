@@ -185,7 +185,7 @@ class SqlFormatter {
 				if(in_array($word,self::$special_reserved)) $type = 'special reserved';
 				else $type = 'reserved';
 				
-				return $word;
+				return substr($string,0,strlen($word));
 			}
 		}
 		
