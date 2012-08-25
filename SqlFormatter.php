@@ -1,6 +1,17 @@
 <?php
+/**
+ * SQL Formatter providing utilities for formatting and syntax highlighting of SQL queries.
+ *
+ * @package    SqlFormatter
+ * @author     Jeremy Dorn <jeremy@jeremydorn.com>
+ * @copyright  2012 Jeremy Dorn
+ * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @link       http://github.com/jdorn/sql-formatter
+ * @version    1.0.0
+ */
 class SqlFormatter {
-	private static $reserved = array (
+	//reserved words (for syntax highlighting)
+	protected static $reserved = array (
 		'ACCESSIBLE', 'ACTION', 'ADD', 'AFTER', 'AGAINST', 'AGGREGATE', 'ALGORITHM', 'ALL', 'ALTER', 'ANALYSE', 'ANALYZE', 'AND', 'AS', 'ASC',
 		'AUTOCOMMIT', 'AUTO_INCREMENT', 'AVG_ROW_LENGTH', 'BACKUP', 'BEGIN', 'BETWEEN', 'BINLOG', 'BOTH', 'BY', 'CASCADE', 'CASE', 'CHANGE', 'CHANGED',
 		'CHARSET', 'CHECK', 'CHECKSUM', 'COLLATE', 'COLLATION', 'COLUMN', 'COLUMNS', 'COMMENT', 'COMMIT', 'COMMITTED', 'COMPRESSED', 'CONCURRENT', 
@@ -28,16 +39,23 @@ class SqlFormatter {
 		'VIEW', 'WHEN', 'WHERE', 'WITH', 'WORK', 'WRITE', 'XOR', 'YEAR_MONTH'
 	);
 	
-	private static $special_reserved = array(
+	//For SQL formatting
+	//These keywords will all be on their own line
+	protected static $special_reserved = array(
 		'SELECT','FROM','WHERE','SET','ORDER BY','GROUP BY','LEFT JOIN','OUTER JOIN','INNER JOIN','RIGHT JOIN','JOIN','LIMIT','VALUES','UPDATE','HAVING'
 	);
 	
-	private static $boundaries = array(',',';',')','(','.','=','<','>','+','-','*','/');
+	//Punctuation that can be used as a boundary between other tokens
+	protected static $boundaries = array(',',';',')','(','.','=','<','>','+','-','*','/');
 
-	private static $whitespace = array(' ',"\n","\t","\r");
+	//White space characters.  These can also be used as a boundary between other tokens
+	protected static $whitespace = array(' ',"\n","\t","\r");
 	
-	private static $quotes = array('"',"'",'`');
+	//Start of quoted strings
+	protected static $quotes = array('"',"'",'`');
 	
+	//For syntax highlighting
+	//Styles applied to different token types
 	public static $quote_style = 'color: blue;';
 	public static $backtick_quote_style = 'color: purple;';
 	public static $reserved_style = 'color:black; font-weight:bold;';
@@ -47,12 +65,20 @@ class SqlFormatter {
 	public static $error_style = 'background-color: red; color: black;';
 	public static $comment_style = 'color: #aaa;';
 	
+	//The tab character to use when formatting SQL
 	public static $tab = '&nbsp;&nbsp;';
 	
-
+	
 	//this flag tells us if the reserved word list is sorted already
-	private static $reserved_sorted;
+	protected static $reserved_sorted;
 
+	/**
+	 * Return the next token and token type in a SQL string.
+	 * Quoted strings, comments, reserved words, and punctuation are all their own tokens.
+	 * @param String $string The SQL string
+	 * @param String $type Will be populated with the type of token
+	 * @return String The next token
+	 */
 	protected static function getNextToken($string,&$type) {
 		//if the next token is a comment
 		if(substr($string,0,2)==='--' || $string[0] === '#' || substr($string,0,2)==='/*') {
@@ -175,6 +201,11 @@ class SqlFormatter {
 		return $ret;
 	}
 	
+	/**
+	 * Format the whitespace in a SQL string and add syntax highlighting
+	 * @param String $string The SQL string
+	 * @return String The SQL string with HTML styles and formatting wrapped in a <pre> tag
+	 */
 	public static function format($string) {
 		//this variable will be populated with formatted html
 		$return = '';
@@ -308,6 +339,11 @@ class SqlFormatter {
 		return "<pre style='background:white;'>".trim($return)."</pre>";
 	}
 	
+	/**
+	 * Add syntax highlighting to a SQL string
+	 * @param String $string The SQL string
+	 * @return String The SQL string with HTML styles applied
+	 */
 	public static function highlight($string) {
 		$old_string_len = strlen($string) + 1;
 		
@@ -366,7 +402,16 @@ class SqlFormatter {
 		return "<pre style='background:white;'>".trim($return)."</pre>";
 	}
 	
+	/**
+	 * Split a SQL string into multiple queries.
+	 * Uses ";" as a query delimiter.
+	 * @param String $string The SQL string
+	 * @return Array An array of individual query strings without trailing semicolons
+	 */
 	public static function splitQuery($string) {
+		//comments between queries cause problems, so remove them first
+		$string = self::removeComments($string);
+		
 		$queries = array();
 		
 		$current_query = '';
@@ -406,5 +451,43 @@ class SqlFormatter {
 		
 		return $queries;
 	}
+	
+	/**
+	 * Remove all comments from a SQL string
+	 * @param String $string The SQL string
+	 * @return String The SQL string without comments
+	 */
+	public static function removeComments($string) {
+		$result = '';
+		
+		$old_string_len = strlen($string) + 1;
+		
+		//keep processing the string until it is empty
+		while(strlen($string)) {
+			//if the string stopped shrinking, there was a problem
+			if($old_string_len <= strlen($string)) {
+				throw new Exception("SQL PARSE ERROR");
+			}
+			$old_string_len = strlen($string);
+			
+			//get the next token and the token type
+			$type = null;
+			$raw_token = self::getNextToken($string,$type);
+			$next_token = $raw_token;
+			
+			//advance the string forward
+			$string = substr($string,strlen($raw_token));
+			
+			//skip comment tokens
+			if(in_array($type,array('comment','block comment'))) {
+				continue;
+			}
+			
+			$result .= $next_token;
+		}		
+		
+		return $result;
+	}
+	
 }
 ?>

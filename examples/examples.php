@@ -1,6 +1,34 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>SqlFormatter Examples</title>
+		<style>
+			body {
+				font-family: arial;
+			}
+			table, td, th {
+				border: 1px solid #aaa;
+			}
+			table {
+				border-width: 1px 1px 0 0;
+				border-spacing: 0;
+			}
+			td, th {
+				border-width: 0 0 1px 1px;
+				padding: 5px 10px;
+				vertical-align:top;
+			}
+			pre {
+				padding:0;
+				margin: 0;
+			}
+		</style>
+	</head>
+	<body>
 <?php
 require_once('../SqlFormatter.php');
 
+//example statements for formatting and highlighting
 $statements = array(
 	"SELECT * FROM MyTable WHERE id = 46",
 	
@@ -27,42 +55,124 @@ $statements = array(
 	as temp, DateCreated as Created FROM MyTable;",
 );
 
-echo "<h1>Formatting</h1>";
-foreach($statements as $sql) {
-	echo "<hr />";
-	echo SqlFormatter::format($sql);
-}
-
-echo "<h1>Syntax Highlighting Only</h1>";
-foreach($statements as $sql) {
-	echo "<hr />";
-	echo SqlFormatter::highlight($sql);
-}
-
-
+//example statements for splitting SQL strings into individual queries
 $split_statements = array(
-	'DROP TABLE IF EXISTS MyTable;
+	"DROP TABLE IF EXISTS MyTable;
 	CREATE TABLE MyTable ( id int );
 	INSERT INTO MyTable	(id)
 		VALUES
 		(1),(2),(3),(4);
-	SELECT * FROM MyTable;',
+	SELECT * FROM MyTable;",
 
-	'SELECT ";"; SELECT ";\"; a;";
-	SELECT ";
-		abc";
+	"SELECT \";\"; SELECT \";\\\"; a;\";
+	SELECT \";
+		abc\";
 	SELECT a,b #comment;
-	FROM test;'
+	FROM test;",
 );
 
-echo "<h1>Splitting Queries</h1>";
-foreach($split_statements as $sql) {
-	echo "<hr />";
-	$queries = SqlFormatter::splitQuery($sql);
-	echo "<ol>";
-	foreach($queries as $query) {
-		echo "<li>".SqlFormatter::highlight($query)."</li>";
-	}
-	echo "</ol>";
-}
+//example statements for removing comments
+$comment_statements = array(
+	"-- This is a comment
+	SELECT
+	/* This is another comment
+	On more than one line */ 
+	Id #This is one final comment
+	as temp, DateCreated as Created FROM MyTable;",
+);
 ?>
+
+
+<h1>Formatting</h1>
+<div>
+	Usage: 
+	<pre>
+	<?php highlight_string('<?php'."\n".'$formatted = SqlFormatter::format($sql);'."\n".'?>'); ?>
+	</pre>
+</div>
+<table>
+	<tr>
+		<th>Original</th>
+		<th>Formatted</th>
+	</tr>
+	<?php foreach($statements as $sql) { ?>
+		<tr>
+			<td><pre><?php echo $sql; ?></pre></td>
+			<td><?php echo SqlFormatter::format($sql); ?></td>
+		</tr>
+	<?php }	?>
+</table>
+
+
+<h1>Syntax Highlighting Only</h1>
+<div>
+	Usage: 
+	<pre>
+	<?php highlight_string('<?php'."\n".'$highlighted = SqlFormatter::highlight($sql);'."\n".'?>'); ?>
+	</pre>
+</div>
+<table>
+	<tr>
+		<th>Original</th>
+		<th>Highlighted</th>
+	</tr>
+	<?php foreach($statements as $sql) { ?>
+		<tr>
+			<td><pre><?php echo $sql; ?></pre></td>
+			<td><?php echo SqlFormatter::highlight($sql); ?></td>
+		</tr>
+	<?php }	?>
+</table>
+
+
+<h1>Splitting SQL Strings Into Individual Queries</h1>
+<div>
+	Usage: 
+	<pre>
+	<?php highlight_string('<?php'."\n".'$queries = SqlFormatter::splitQuery($sql);'."\n".'?>'); ?>
+	</pre>
+</div>
+<table>
+	<tr>
+		<th>Original</th>
+		<th>Split</th>
+	</tr>
+	<?php foreach($split_statements as $sql) { ?>
+		<tr>
+			<td><pre><?php echo SqlFormatter::highlight($sql); ?></pre></td>
+			<td><?php 
+				$queries = SqlFormatter::splitQuery($sql);
+				echo "<ol>";
+				foreach($queries as $query) {
+					echo "<li><pre>".SqlFormatter::highlight($query)."</pre></li>";
+				}
+				echo "</ol>";
+			?></td>
+		</tr>
+	<?php }	?>
+</table>
+
+
+
+<h1>Removing Comments</h1>
+<div>
+	Usage: 
+	<pre>
+	<?php highlight_string('<?php'."\n".'$nocomments = SqlFormatter::removeComments($sql);'."\n".'?>'); ?>
+	</pre>
+</div>
+<table>
+	<tr>
+		<th>Original</th>
+		<th>Comments Removed</th>
+	</tr>
+	<?php foreach($comment_statements as $sql) { ?>
+		<tr>
+			<td><pre><?php echo SqlFormatter::highlight($sql); ?></pre></td>
+			<td><pre><?php echo SqlFormatter::highlight(SqlFormatter::removeComments($sql)) ?></pre></td>
+		</tr>
+	<?php }	?>
+</table>
+
+</body>
+</html>
