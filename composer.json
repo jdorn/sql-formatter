@@ -1,0 +1,27 @@
+{
+    "name": "jdorn/sql-formatter",
+    "description": "a PHP SQL highlighting library",
+    "homepage": "https://github.com/jdorn/sql-formatter/",
+    "keywords": ["sql", "highlight"],
+    "minimum-stability": "dev",
+    "license": "LGPL",
+    "type": "library",
+    "require": {
+        "php": ">=5.2.4"
+    },
+    "authors": [
+        {
+            "name": "Jeremy Dorn",
+            "email": "jeremy@jeremydorn.com",
+            "homepage": "http://jeremydorn.com/"
+        }
+    ],
+    "autoload": {
+        "files": ["lib/SqlFormatter.php"]
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}
