@@ -88,12 +88,36 @@ $comment_statements = array(
 ?>
 
 
-<h1>Formatting</h1>
+<h1>Formatting And Syntax Highlighting</h1>
 
 <div>
     Usage:
     <pre>
     <?php highlight_string('<?php' . "\n" . '$formatted = SqlFormatter::format($sql);' . "\n" . '?>'); ?>
+    </pre>
+</div>
+<table>
+    <tr>
+        <th>Original</th>
+        <th>Formatted And Highlighted</th>
+    </tr>
+    <?php foreach ($statements as $sql) { ?>
+    <tr>
+        <td>
+            <pre><?php echo $sql; ?></pre>
+        </td>
+        <td><?php echo SqlFormatter::format($sql); ?></td>
+    </tr>
+    <?php }    ?>
+</table>
+
+
+<h1>Formatting Only</h1>
+
+<div>
+    Usage:
+    <pre>
+    <?php highlight_string('<?php' . "\n" . '$formatted = SqlFormatter::format($sql, false);' . "\n" . '?>'); ?>
     </pre>
 </div>
 <table>
@@ -106,7 +130,7 @@ $comment_statements = array(
         <td>
             <pre><?php echo $sql; ?></pre>
         </td>
-        <td><?php echo SqlFormatter::format($sql); ?></td>
+        <td><pre><?php echo htmlentities(SqlFormatter::format($sql,false)); ?></pre></td>
     </tr>
     <?php }    ?>
 </table>

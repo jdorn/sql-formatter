@@ -1,5 +1,4 @@
 <?php
-
 /**
  * SQL Formatter providing utilities for formatting and syntax highlighting of SQL queries.
  *
@@ -8,7 +7,7 @@
  * @copyright  2012 Jeremy Dorn
  * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @link       http://github.com/jdorn/sql-formatter
- * @version    1.0.0
+ * @version    1.0.1
  */
 class SqlFormatter
 {
@@ -68,22 +67,20 @@ class SqlFormatter
     public static $comment_style = 'color: #aaa;';
 
     // The tab character to use when formatting SQL
-    public static $tab = '&nbsp;&nbsp;';
-
+    public static $tab = '  ';
 
     // This flag tells us if the reserved word list is sorted already
     protected static $reserved_sorted;
 
     /**
      * Return the next token and token type in a SQL string.
-     * Quoted strings, comments, reserved words, and punctuation are all their own tokens.
+     * Quoted strings, comments, reserved words, whitespace, and punctuation are all their own tokens.
      *
      * @param String $string The SQL string
-     * @param String $type Will be populated with the type of token
      *
-     * @return String The next token
+     * @return Array An associative array containing a 'token' and 'type' key.
      */
-    protected static function getNextToken($string, &$type)
+    protected static function getNextToken($string)
     {
         // If the next token is a comment
         if (substr($string, 0, 2) === '--' || $string[0] === '#' || substr($string, 0, 2) === '/*') {
@@ -98,7 +95,10 @@ class SqlFormatter
                 $type = 'block comment';
             }
 
-            return substr($string, 0, $last);
+            return array(
+                'token'=>substr($string, 0, $last),
+                'type'=>$type
+            );
         }
 
         // If the next item is a string
@@ -114,46 +114,60 @@ class SqlFormatter
             }
             if ($quote === '`') $type = 'backtick quote';
             else $type = 'quote';
-
-            return substr($string, 0, $i + 1);
+            return array(
+                'token'=>substr($string, 0, $i + 1),
+                'type'=>$type
+            );
         } // Separators
         elseif (in_array($string[0], self::$boundaries)) {
             // If it is a simple string or empty between the parentheses, just count as a word
             // this makes it so we don't split things like NOW() or COUNT(*) into separate lines
             if ($string[0] === '(') {
+                // "()"
                 if ($string[1] === ')') {
-                    $type = 'word';
-                    return '()';
+                    return array(
+                        'token'=>'()',
+                        'type'=>'word'
+                    );
                 }
-                $type2 = null;
-                $next_token = self::getNextToken(substr($string, 1), $type2);
-                if ($string[strlen($next_token) + 1] === ')') {
-                    if (in_array($type2, array('word', 'whitespace', 'boundary'))) {
-                        $type = 'word';
-                        return '(' . $next_token . ')';
+
+                // "(word/whitespace/boundary)"
+                $next_token = self::getNextToken(substr($string, 1));
+                if ($string[strlen($next_token['token']) + 1] === ')') {
+                    if (in_array($next_token['type'], array('word', 'whitespace', 'boundary'))) {
+                        return array(
+                            'token'=>'(' . $next_token['token'] . ')',
+                            'type'=>'word'
+                        );
                     }
                 }
             }
 
+            //return single parentheses as their own token
             if (in_array($string[0], array('(', ')'))) {
-                $type = $string[0];
-                return $string[0];
+                return array(
+                    'token'=>$string[0],
+                    'type'=>$string[0]
+                );
             }
 
-            $type2 = null;
-            $next_token = self::getNextToken(substr($string, 1), $type2);
 
             // If there are 1 or more boundary characters together, return as a single word
-            if ($type2 === 'boundary') {
-                $type = 'boundary';
-                return $string[0] . $next_token;
+            $next_token = self::getNextToken(substr($string, 1));
+            if ($next_token['type'] === 'boundary') {
+                return array(
+                    'token'=>$string[0].$next_token['token'],
+                    'type'=>'boundary'
+                );
             }
 
             // Otherwise, just return the single boundary character
             if (in_array($string[0], array('.', ','))) $type = $string[0];
             else $type = 'boundary';
-
-            return $string[0];
+            return array(
+                'token'=>$string[0],
+                'type'=>$type
+            );
         } // Whitespace
         elseif (in_array($string[0], self::$whitespace)) {
             for ($i = 1; $i < strlen($string); $i++) {
@@ -162,15 +176,15 @@ class SqlFormatter
                 }
             }
 
-            $type = 'whitespace';
-            return substr($string, 0, $i);
+            return array(
+                'token'=>substr($string, 0, $i),
+                'type'=>'whitespace'
+            );
         }
 
         // Sort reserved word list from longest word to shortest
         if (!self::$reserved_sorted) {
-            usort(self::$reserved, function ($a, $b) {
-                return strlen($b) - strlen($a);
-            });
+            usort(self::$reserved, array('SqlFormatter','sortLength'));
             self::$reserved_sorted = true;
         }
 
@@ -185,8 +199,10 @@ class SqlFormatter
 
                 if (in_array($word, self::$special_reserved)) $type = 'special reserved';
                 else $type = 'reserved';
-
-                return substr($string, 0, strlen($word));
+                return array(
+                    'token'=> substr($string, 0, strlen($word)),
+                    'type'=>$type
+                );
             }
         }
 
@@ -200,20 +216,62 @@ class SqlFormatter
         $ret = substr($string, 0, $i);
         if (is_numeric($ret)) $type = 'number';
         else $type = 'word';
-
-        return $ret;
+        return array(
+            'token'=>$ret,
+            'type'=>$type
+        );
     }
 
     /**
-     * Format the whitespace in a SQL string and add syntax highlighting
+     * Takes a SQL string and breaks it into tokens.
+     * Each token is an associative array with a 'token' and 'type' key.
      *
      * @param String $string The SQL string
      *
-     * @throws Exception when we can't remove parts of the initial query
+     * @throws Exception when there is a problem tokenizing the input string
+     *
+     * @return Array An array of tokens.
+     */
+    protected static function tokenize($string)
+    {
+        $tokens = array();
+
+        //used for debugging if there is an error while tokenizing the string
+        $original_length = strlen($string);
+
+        //used to make sure the string keeps shrinking on each iteration
+        $old_string_len = strlen($string) + 1;
+
+        // Keep processing the string until it is empty
+        while (strlen($string)) {
+            // If the string stopped shrinking, there was a problem
+            if ($old_string_len <= strlen($string)) {
+                throw new Exception("SQL Parse Error - Unable to tokenize string at character ".($original_length - $old_string_len));
+            }
+            $old_string_len = strlen($string);
+
+            // Get the next token and the token type
+            $token = self::getNextToken($string);
+            $tokens[] = $token;
+
+            //advance the string
+            $string = substr($string,strlen($token['token']));
+        }
+
+        return $tokens;
+    }
+
+    /**
+     * Format the whitespace in a SQL string to make it easier to read.
+     *
+     * @param String  $string    The SQL string
+     * @param boolean $highlight If true, syntax highlighting will also be performed
+     *
+     * @throws Exception when there is a problem tokenizing the input string
      *
      * @return String The SQL string with HTML styles and formatting wrapped in a <pre> tag
      */
-    public static function format($string)
+    public static function format($string, $highlight=true)
     {
         // This variable will be populated with formatted html
         $return = '';
@@ -227,119 +285,100 @@ class SqlFormatter
         $newline = false;
         $indented = false;
         $extra_indent = 0;
-        $old_string_len = strlen($string) + 1;
 
-        // Keep processing the string until it is empty
-        while (strlen($string)) {
-            // If the string stopped shrinking, there was a problem
-            if ($old_string_len <= strlen($string)) {
-                throw new Exception("SQL PARSE ERROR");
+        // Tokenize String
+        $tokens = self::tokenize($string);
+
+        foreach ($tokens as $token) {
+            // Get highlighted token if doing syntax highlighting
+            if ($highlight) {
+                $highlighted = self::highlightToken($token);
             }
-            $old_string_len = strlen($string);
-
-            // Get the next token and the token type
-            $type = null;
-            $raw_token = self::getNextToken($string, $type);
-            $next_token = htmlentities($raw_token);
-
-            // Advance the string forward
-            $string = substr($string, strlen($raw_token));
+            // If returning raw text
+            else {
+                $highlighted = $token['token'];
+            }
 
             // Don't process whitespace
-            if ($type === 'whitespace') {
+            if ($token['type'] === 'whitespace') {
                 continue;
             } // Display comments directly where they appear in the source
-            elseif (in_array($type, array('comment', 'block comment'))) {
-                if ($type === 'block comment') {
+            elseif (in_array($token['type'], array('comment', 'block comment'))) {
+                if ($token['type'] === 'block comment') {
                     $return .= "\n" . str_repeat($tab, $indent);
                 }
 
-                $return .= '<span style="' . self::$comment_style . '">' . $next_token . '</span> ';
+                $return .= $highlighted;
                 $newline = true;
                 continue;
             }
 
             // If this token decreases the indent level
-            if (in_array($type, array('special reserved', ')'))) {
+            if (in_array($token['type'], array('special reserved', ')'))) {
                 if ($indented) {
                     $extra_indent++;
-                } elseif ($indent && ($type === 'special reserved' || $indent > 1)) {
+                } elseif ($indent && ($token['type'] === 'special reserved' || $indent > 1)) {
                     $indent--;
 
-                    if ($type === ')' && $extra_indent) {
+                    if ($token['type'] === ')' && $extra_indent) {
                         $indent -= $extra_indent;
                         $extra_indent = 0;
                     }
-                } else {
-                    $return .= '<span style="' . self::$error_style . '">' . $next_token . '</span> ';
+                } // If there are mismatched parentheses
+                else {
+                    if ($highlight) {
+                        $return .= self::highlightError(htmlentities($token['token'])).' ';
+                    } else {
+                        $return .= $highlighted;
+                    }
+
                     continue;
                 }
             }
 
             // If we need a new line before the token
-            if ($newline || in_array($type, array(')', 'special reserved'))) {
+            if ($newline || in_array($token['type'], array(')', 'special reserved'))) {
                 $newline = false;
                 $return .= "\n" . str_repeat($tab, $indent);
             }
 
             // If we need a new line after the token
-            if (in_array($type, array(',', '(', 'special reserved'))) {
+            if (in_array($token['type'], array(',', '(', 'special reserved'))) {
                 $newline = true;
             }
 
             // If this token increases the indent level
-            if (in_array($type, array('special reserved', '('))) {
+            if (in_array($token['type'], array('special reserved', '('))) {
                 $indent++;
                 $indented = true;
             } else {
                 $indented = false;
             }
 
-            switch ($type) {
-                case 'backtick quote':
-                    $return .= "<span style='" . self::$backtick_quote_style . "'>" . $next_token . "</span> ";
-                    break;
-                case 'quote':
-                    $return .= "<span style='" . self::$quote_style . "'>" . $next_token . "</span> ";
-                    break;
-                case 'reserved':
-                case 'special reserved':
-                    $return .= "<span style='" . self::$reserved_style . "'>" . $next_token . "</span> ";
-                    break;
-                case '(':
-                    $return .= '(';
-                    break;
-                case ')':
-                    $return .= ") ";
-                    break;
-                case 'number':
-                    $return .= "<span style='" . self::$number_style . "'>" . $next_token . "</span> ";
-                    break;
-                case 'boundary':
-                case '.':
-                case ',':
-                    if (in_array($next_token, array('.', ',', ';'))) {
-                        $return = rtrim($return, ' ');
-                    }
+            // If the token shouldn't have a space before it
+            if (in_array($token['token'], array('.', ',', ';','()'))) {
+                $return = rtrim($return, ' ');
+            }
 
-                    $return .= "<span style='" . self::$boundary_style . "'>" . $next_token . "</span> ";
+            $return .= $highlighted.' ';
 
-                    if (in_array($next_token, array('.'))) {
-                        $return = rtrim($return, ' ');
-                    }
-
-                    break;
-                default:
-                    $return .= "<span style='" . self::$default_style . "'>" . $next_token . "</span> ";
+            // If the token shouldn't have a space after it
+            if (in_array($token['token'], array('(','.'))) {
+                $return = rtrim($return,' ');
             }
         }
 
         // If there are unmatched parentheses
-        if ($indent !== 1) {
-            $return .= "\n<span style='color:red;'>WARNING: unmatched parentheses</span>";
+        if ($indent !== 1 && $highlight) {
+
+            $return .= "\n".self::highlightError("WARNING: unclosed parentheses");
         }
 
-        return "<pre style='background:white;'>" . trim($return) . "</pre>";
+        if ($highlight) {
+            return "<pre style='background:white;'>" . trim($return) . "</pre>";
+        } else {
+            return trim($return);
+        }
     }
 
     /**
@@ -347,64 +386,18 @@ class SqlFormatter
      *
      * @param String $string The SQL string
      *
-     * @throws Exception when we coudn't remove parts of the initial query
+     * @throws Exception when there is a problem tokenizing the input string
      *
      * @return String The SQL string with HTML styles applied
      */
     public static function highlight($string)
     {
-        $old_string_len = strlen($string) + 1;
+        $tokens = self::tokenize($string);
 
         $return = '';
 
-        // Keep processing the string until it is empty
-        while (strlen($string)) {
-            // If the string stopped shrinking, there was a problem
-            if ($old_string_len <= strlen($string)) {
-                throw new Exception("SQL PARSE ERROR");
-            }
-            $old_string_len = strlen($string);
-
-            // Get the next token and the token type
-            $type = null;
-            $raw_token = self::getNextToken($string, $type);
-            $next_token = htmlentities($raw_token);
-
-            // Advance the string forward
-            $string = substr($string, strlen($raw_token));
-
-            switch ($type) {
-                case 'backtick quote':
-                    $return .= "<span style='" . self::$backtick_quote_style . "'>" . $next_token . "</span>";
-                    break;
-                case 'quote':
-                    $return .= "<span style='" . self::$quote_style . "'>" . $next_token . "</span>";
-                    break;
-                case 'reserved':
-                case 'special reserved':
-                    $return .= "<span style='" . self::$reserved_style . "'>" . $next_token . "</span>";
-                    break;
-                case '(':
-                    $return .= '(';
-                    break;
-                case ')':
-                    $return .= ")";
-                    break;
-                case 'number':
-                    $return .= "<span style='" . self::$number_style . "'>" . $next_token . "</span>";
-                    break;
-                case 'boundary':
-                case '.':
-                case ',':
-                    $return .= "<span style='" . self::$boundary_style . "'>" . $next_token . "</span>";
-                    break;
-                case 'comment':
-                case 'block comment':
-                    $return .= "<span style='" . self::$comment_style . "'>" . $next_token . "</span>";
-                    break;
-                default:
-                    $return .= "<span style='" . self::$default_style . "'>" . $next_token . "</span>";
-            }
+        foreach ($tokens as $token) {
+            $return .= self::highlightToken($token);
         }
 
         return "<pre style='background:white;'>" . trim($return) . "</pre>";
@@ -416,7 +409,7 @@ class SqlFormatter
      *
      * @param String $string The SQL string
      *
-     * @throws Exception when we can't remove query parts of the initial string
+     * @throws Exception when there is a problem tokenizing the input string
      *
      * @return Array An array of individual query strings without trailing semicolons
      */
@@ -426,35 +419,19 @@ class SqlFormatter
         $string = self::removeComments($string);
 
         $queries = array();
-
         $current_query = '';
 
-        $old_string_len = strlen($string) + 1;
+        $tokens = self::tokenize($string);
 
-        // Keep processing the string until it is empty
-        while (strlen($string)) {
-            // If the string stopped shrinking, there was a problem
-            if ($old_string_len <= strlen($string)) {
-                throw new Exception("SQL PARSE ERROR");
-            }
-            $old_string_len = strlen($string);
-
-            // Get the next token and the token type
-            $type = null;
-            $raw_token = self::getNextToken($string, $type);
-            $next_token = $raw_token;
-
-            // Advance the string forward
-            $string = substr($string, strlen($raw_token));
-
+        foreach ($tokens as $token) {
             // If this is a query separator
-            if ($next_token === ';') {
+            if ($token['token'] === ';') {
                 if (trim($current_query)) $queries[] = trim($current_query);
                 $current_query = '';
                 continue;
             }
 
-            $current_query .= $next_token;
+            $current_query .= $token['token'];
         }
 
         if (trim($current_query)) {
@@ -469,7 +446,7 @@ class SqlFormatter
      *
      * @param String $string The SQL string
      *
-     * @throws Exception when we can't properly remove the comments
+     * @throws Exception when there is a problem tokenizing the input string
      *
      * @return String The SQL string without comments
      */
@@ -477,33 +454,160 @@ class SqlFormatter
     {
         $result = '';
 
-        $old_string_len = strlen($string) + 1;
+        $tokens = self::tokenize($string);
 
-        // Keep processing the string until it is empty
-        while (strlen($string)) {
-            // If the string stopped shrinking, there was a problem
-            if ($old_string_len <= strlen($string)) {
-                throw new Exception("SQL PARSE ERROR");
-            }
-            $old_string_len = strlen($string);
-
-            // Get the next token and the token type
-            $type = null;
-            $raw_token = self::getNextToken($string, $type);
-            $next_token = $raw_token;
-
-            // Advance the string forward
-            $string = substr($string, strlen($raw_token));
-
+        foreach ($tokens as $token) {
             // Skip comment tokens
-            if (in_array($type, array('comment', 'block comment'))) {
+            if (in_array($token['type'], array('comment', 'block comment'))) {
                 continue;
             }
 
-            $result .= $next_token;
+            $result .= $token['token'];
         }
 
         return $result;
     }
 
+    /**
+     * Highlights a token depending on its type.
+     *
+     * @param Array $token An associative array containing 'token' and 'type' keys.
+     *
+     * @return String HTML code of the highlighted token.
+     */
+    protected static function highlightToken($token)
+    {
+        $type = $token['type'];
+        $token = htmlentities($token['token']);
+
+        switch ($type) {
+                case 'backtick quote':
+                case 'quote':
+                    return self::highlightQuote($token,$type);
+                case 'reserved':
+                case 'special reserved':
+                    return self::highlightReservedWord($token,$type);
+                case '(':
+                case ')':
+                    return $token;
+                case 'number':
+                    return self::highlightNumber($token,$type);
+                case 'boundary':
+                case '.':
+                case ',':
+                    return self::highlightBoundary($token,$type);
+                case 'comment':
+                case 'block comment':
+                    return self::highlightComment($token,$type);
+                default:
+                    return self::highlightDefault($token,$type);
+            }
+    }
+
+    /**
+     * Highlights a quoted string
+     *
+     * @param String $value The token's value
+     * @param String $type  The token's type
+     *
+     * @return String HTML code of the highlighted token.
+     */
+    protected static function highlightQuote($value,$type)
+    {
+        if ($type === 'backtick quote') {
+            return "<span style='" . self::$backtick_quote_style . "'>" . $value . "</span>";
+        } else {
+            return "<span style='" . self::$quote_style . "'>" . $value . "</span>";
+        }
+    }
+
+    /**
+     * Highlights a reserved word
+     *
+     * @param String $value The token's value
+     * @param String $type  The token's type
+     *
+     * @return String HTML code of the highlighted token.
+     */
+    protected static function highlightReservedWord($value,$type)
+    {
+        return "<span style='" . self::$reserved_style . "'>" . $value . "</span>";
+    }
+
+    /**
+     * Highlights a boundary token
+     *
+     * @param String $value The token's value
+     * @param String $type  The token's type
+     *
+     * @return String HTML code of the highlighted token.
+     */
+    protected static function highlightBoundary($value,$type)
+    {
+        return "<span style='" . self::$boundary_style . "'>" . $value . "</span>";
+    }
+
+    /**
+     * Highlights a number
+     *
+     * @param String $value The token's value
+     * @param String $type  The token's type
+     *
+     * @return String HTML code of the highlighted token.
+     */
+    protected static function highlightNumber($value,$type)
+    {
+        return "<span style='" . self::$number_style . "'>" . $value . "</span>";
+    }
+
+    /**
+     * Highlights an error
+     *
+     * @param String $value The token's value
+     *
+     * @return String HTML code of the highlighted token.
+     */
+    protected static function highlightError($value)
+    {
+        return "<span style='" . self::$error_style . "'>" . $value . "</span>";
+    }
+
+    /**
+     * Highlights a comment
+     *
+     * @param String $value The token's value
+     * @param String $type  The token's type
+     *
+     * @return String HTML code of the highlighted token.
+     */
+    protected static function highlightComment($value,$type)
+    {
+        return "<span style='" . self::$comment_style . "'>" . $value . "</span>";
+    }
+
+    /**
+     * Highlights a generic token
+     *
+     * @param String $value The token's value
+     * @param String $type  The token's type
+     *
+     * @return String HTML code of the highlighted token.
+     */
+    protected static function highlightDefault($value,$type)
+    {
+        return "<span style='" . self::$default_style . "'>" . $value . "</span>";
+    }
+
+    /**
+     * Helper function for sorting the list of reserved words by length
+     *
+     * @param String $a The first string
+     * @param String $b The second string
+     *
+     * @return int The comparison of the string lengths
+     */
+    private static function sortLength ($a, $b)
+    {
+        return strlen($b) - strlen($a);
+    }
 }
