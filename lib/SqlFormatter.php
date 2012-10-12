@@ -104,9 +104,15 @@ class SqlFormatter
         // If the next item is a string
         if (in_array($string[0], self::$quotes)) {
             $quote = $string[0];
-            for ($i = 1; $i < strlen($string); $i++) {
+            for ($i = 1; $i < strlen($string); $i++)
+            {
+                $next_char = '';
+                if (isset($string[$i + 1])) {
+                    $next_char = $string[$i + 1];
+                }
+                
                 // Escaped (either backslash or backtick escaped)
-                if (($quote != '`' && $string[$i] === '\\') || ($quote === '`' && $string[$i] === '`' && $string[$i + 1] === '`')) {
+                if (($quote != '`' && $string[$i] === '\\') || ($quote === '`' && $string[$i] === '`' && $next_char === '`')) {
                     $i++;
                 } elseif ($string[$i] === $quote) {
                     break;
