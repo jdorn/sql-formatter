@@ -104,9 +104,8 @@ class SqlFormatter
         // If the next item is a string
         if (in_array($string[0], self::$quotes)) {
             $quote = $string[0];
-            for ($i = 1; $i < strlen($string); $i++)
-            {
-                $next_char = '';
+            for ($i = 1; $i < strlen($string); $i++) {
+                $next_char = null;
                 if (isset($string[$i + 1])) {
                     $next_char = $string[$i + 1];
                 }
