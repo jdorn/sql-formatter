@@ -47,7 +47,7 @@ class SqlFormatter
     );
 
     // Punctuation that can be used as a boundary between other tokens
-    protected static $boundaries = array(',', ';', ')', '(', '.', '=', '<', '>', '+', '-', '*', '/');
+    protected static $boundaries = array(',', ';', ')', '(', '.', '=', '<', '>', '+', '-', '*', '/', '!', '^', '%', '|', '&');
 
     // White space characters.  These can also be used as a boundary between other tokens
     protected static $whitespace = array(' ', "\n", "\t", "\r");
