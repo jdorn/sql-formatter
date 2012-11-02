@@ -77,10 +77,11 @@ class SqlFormatter
      * Quoted strings, comments, reserved words, whitespace, and punctuation are all their own tokens.
      *
      * @param String $string The SQL string
+     * @param array $previous The result of the previous getNextToken() call
      *
      * @return Array An associative array containing a 'token' and 'type' key.
      */
-    protected static function getNextToken($string)
+    protected static function getNextToken($string, $previous = null)
     {
         // If the next token is a comment
         if (substr($string, 0, 2) === '--' || $string[0] === '#' || substr($string, 0, 2) === '/*') {
@@ -195,19 +196,23 @@ class SqlFormatter
 
         $all_boundaries = array_merge(self::$boundaries, self::$whitespace);
 
-        // Reserved word
-        $test = strtoupper($string);
-        foreach (self::$reserved as $word) {
-            // If(strlen($test < strlen($word))) continue;
-            if (substr($test, 0, strlen($word)) === $word) {
-                if (isset($string[strlen($word)]) && !in_array($string[strlen($word)], $all_boundaries)) continue;
+        //a reserved word cannot be preceded by a '.'
+        //this makes it so in "mytable.from", "from" is not considered a reserved word
+        if(!$previous || !isset($previous['token']) || $previous['token'] !== '.') {
+            // Reserved word
+            $test = strtoupper($string);
+            foreach (self::$reserved as $word) {
+                // If(strlen($test < strlen($word))) continue;
+                if (substr($test, 0, strlen($word)) === $word) {
+                    if (isset($string[strlen($word)]) && !in_array($string[strlen($word)], $all_boundaries)) continue;
 
-                if (in_array($word, self::$special_reserved)) $type = 'special reserved';
-                else $type = 'reserved';
-                return array(
-                    'token'=> substr($string, 0, strlen($word)),
-                    'type'=>$type
-                );
+                    if (in_array($word, self::$special_reserved)) $type = 'special reserved';
+                    else $type = 'reserved';
+                    return array(
+                        'token'=> substr($string, 0, strlen($word)),
+                        'type'=>$type
+                    );
+                }
             }
         }
 
@@ -247,6 +252,8 @@ class SqlFormatter
         //used to make sure the string keeps shrinking on each iteration
         $old_string_len = strlen($string) + 1;
 
+        $token = null;
+
         // Keep processing the string until it is empty
         while (strlen($string)) {
             // If the string stopped shrinking, there was a problem
@@ -256,7 +263,7 @@ class SqlFormatter
             $old_string_len = strlen($string);
 
             // Get the next token and the token type
-            $token = self::getNextToken($string);
+            $token = self::getNextToken($string, $token);
             $tokens[] = $token;
 
             //advance the string
@@ -381,7 +388,7 @@ class SqlFormatter
         // If there are unmatched parentheses
         if ($indent !== 1 && $highlight) {
 
-            $return .= "\n".self::highlightError("WARNING: unclosed parentheses");
+            $return .= "\n".self::highlightError("WARNING: unclosed parentheses or section");
         }
 
         if ($highlight) {
