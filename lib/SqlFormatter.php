@@ -1,13 +1,14 @@
 <?php
 /**
- * SQL Formatter providing utilities for formatting and syntax highlighting of SQL queries.
+ * SQL Formatter is a collection of utilities for debugging SQL queries.
+ * It includes methods for formatting, syntax highlighting, removing comments, etc.
  *
  * @package    SqlFormatter
  * @author     Jeremy Dorn <jeremy@jeremydorn.com>
  * @copyright  2012 Jeremy Dorn
  * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @link       http://github.com/jdorn/sql-formatter
- * @version    1.0.1
+ * @version    1.1.0
  */
 class SqlFormatter
 {
