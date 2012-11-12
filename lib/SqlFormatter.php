@@ -97,6 +97,10 @@ class SqlFormatter
                 $type = 'block comment';
             }
 
+            if($last === false) {
+                $last = strlen($string);
+            }
+
             return array(
                 'token'=>substr($string, 0, $last),
                 'type'=>$type
@@ -131,7 +135,7 @@ class SqlFormatter
             // this makes it so we don't split things like NOW() or COUNT(*) into separate lines
             if ($string[0] === '(') {
                 // "()"
-                if ($string[1] === ')') {
+                if (isset($string[1]) && $string[1] === ')') {
                     return array(
                         'token'=>'()',
                         'type'=>'word'
@@ -140,7 +144,7 @@ class SqlFormatter
 
                 // "(word/whitespace/boundary)"
                 $next_token = self::getNextToken(substr($string, 1));
-                if ($string[strlen($next_token['token']) + 1] === ')') {
+                if (isset($string[strlen($next_token['token']) + 1]) && $string[strlen($next_token['token']) + 1] === ')') {
                     if (in_array($next_token['type'], array('word', 'whitespace', 'boundary'))) {
                         return array(
                             'token'=>'(' . $next_token['token'] . ')',
