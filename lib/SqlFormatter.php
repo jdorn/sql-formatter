@@ -70,8 +70,11 @@ class SqlFormatter
     // The tab character to use when formatting SQL
     public static $tab = '  ';
 
-    // This flag tells us if the reserved word list is sorted already
-    protected static $reserved_sorted;
+    // This flag tells us if SqlFormatted has been initialized
+    protected static $init;
+
+    // This is a combination of all the boundary characters and all the whitespace characters
+    protected static $all_boundaries;
 
     /**
      * Return the next token and token type in a SQL string.
@@ -192,13 +195,15 @@ class SqlFormatter
             );
         }
 
-        // Sort reserved word list from longest word to shortest
-        if (!self::$reserved_sorted) {
+        if (!self::$init) {
+            //Sort reserved word list from longest word to shortest
             usort(self::$reserved, array('SqlFormatter','sortLength'));
-            self::$reserved_sorted = true;
-        }
 
-        $all_boundaries = array_merge(self::$boundaries, self::$whitespace);
+            //Combine boundary characters and whitespace
+            self::$all_boundaries = array_merge(self::$boundaries, self::$whitespace);
+
+            self::$init = true;
+        }
 
         //a reserved word cannot be preceded by a '.'
         //this makes it so in "mytable.from", "from" is not considered a reserved word
@@ -208,7 +213,7 @@ class SqlFormatter
             foreach (self::$reserved as $word) {
                 // If(strlen($test < strlen($word))) continue;
                 if (substr($test, 0, strlen($word)) === $word) {
-                    if (isset($string[strlen($word)]) && !in_array($string[strlen($word)], $all_boundaries)) continue;
+                    if (isset($string[strlen($word)]) && !in_array($string[strlen($word)], self::$all_boundaries)) continue;
 
                     if (in_array($word, self::$special_reserved)) $type = 'special reserved';
                     else $type = 'reserved';
@@ -222,7 +227,7 @@ class SqlFormatter
 
         // Look for first word separator
         for ($i = 1, $length = strlen($string); $i < $length; $i++) {
-            if (in_array($string[$i], $all_boundaries)) {
+            if (in_array($string[$i], self::$all_boundaries)) {
                 break;
             }
         }
