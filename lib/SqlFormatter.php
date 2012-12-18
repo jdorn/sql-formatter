@@ -86,9 +86,8 @@ class SqlFormatter
     {
         // If the next token is a comment
         if (substr($string, 0, 2) === '--' || $string[0] === '#' || substr($string, 0, 2) === '/*') {
-
             // Comment until end of line
-            if (in_array($string[0], array('-', '#'))) {
+            if ($string[0] === '-' || $string[0] === '#') {
                 $last = strpos($string, "\n");
                 $type = 'comment';
             } // Comment until closing comment tag
@@ -110,7 +109,7 @@ class SqlFormatter
         // If the next item is a string
         if (in_array($string[0], self::$quotes)) {
             $quote = $string[0];
-            for ($i = 1; $i < strlen($string); $i++) {
+            for ($i = 1, $length = strlen($string); $i < $length; $i++) {
                 $next_char = null;
                 if (isset($string[$i + 1])) {
                     $next_char = $string[$i + 1];
@@ -155,7 +154,7 @@ class SqlFormatter
             }
 
             //return single parentheses as their own token
-            if (in_array($string[0], array('(', ')'))) {
+            if ($string[0] === '(' || $string[0] === ')') {
                 return array(
                     'token'=>$string[0],
                     'type'=>$string[0]
@@ -173,7 +172,7 @@ class SqlFormatter
             }
 
             // Otherwise, just return the single boundary character
-            if (in_array($string[0], array('.', ','))) $type = $string[0];
+            if ($string[0] === '.' || $string[0] === ',') $type = $string[0];
             else $type = 'boundary';
             return array(
                 'token'=>$string[0],
@@ -181,7 +180,7 @@ class SqlFormatter
             );
         } // Whitespace
         elseif (in_array($string[0], self::$whitespace)) {
-            for ($i = 1; $i < strlen($string); $i++) {
+            for ($i = 1, $length = strlen($string); $i < $length; $i++) {
                 if (!in_array($string[$i], self::$whitespace)) {
                     break;
                 }
@@ -222,7 +221,7 @@ class SqlFormatter
         }
 
         // Look for first word separator
-        for ($i = 1; $i < strlen($string); $i++) {
+        for ($i = 1, $length = strlen($string); $i < $length; $i++) {
             if (in_array($string[$i], $all_boundaries)) {
                 break;
             }
@@ -319,7 +318,7 @@ class SqlFormatter
             if ($token['type'] === 'whitespace') {
                 continue;
             } // Display comments directly where they appear in the source
-            elseif (in_array($token['type'], array('comment', 'block comment'))) {
+            elseif ($token['type'] === 'comment' || $token['type'] === 'block comment') {
                 if ($token['type'] === 'block comment') {
                     $return .= "\n" . str_repeat($tab, $indent);
                 }
@@ -353,18 +352,18 @@ class SqlFormatter
             }
 
             // If we need a new line before the token
-            if ($newline || in_array($token['type'], array(')', 'special reserved'))) {
+            if ($newline || ($token['type'] === ')' || $token['type'] === 'special reserved')) {
                 $newline = false;
                 $return .= "\n" . str_repeat($tab, $indent);
             }
 
             // If we need a new line after the token
-            if (in_array($token['type'], array(',', '(', 'special reserved'))) {
+            if ($token['type'] === ',' || $token['type'] === '(' || $token['type'] === 'special reserved') {
                 $newline = true;
             }
 
             // If this token increases the indent level
-            if (in_array($token['type'], array('special reserved', '('))) {
+            if ($token['type'] === 'special reserved' || $token['type'] === '(') {
                 $indent++;
                 $indented = true;
             } else {
@@ -372,7 +371,7 @@ class SqlFormatter
             }
 
             // If the token shouldn't have a space before it
-            if (in_array($token['token'], array('.', ',', ';'))) {
+            if ($token['token'] === '.' || $token['token'] === ',' || $token['token'] === ';') {
                 $return = rtrim($return, ' ');
             }
 
@@ -385,14 +384,13 @@ class SqlFormatter
             $return .= $highlighted.' ';
 
             // If the token shouldn't have a space after it
-            if (in_array($token['token'], array('(','.'))) {
+            if ($token['token'] === '(' || $token['token'] === '.') {
                 $return = rtrim($return,' ');
             }
         }
 
         // If there are unmatched parentheses
         if ($indent !== 1 && $highlight) {
-
             $return .= "\n".self::highlightError("WARNING: unclosed parentheses or section");
         }
 
@@ -480,7 +478,7 @@ class SqlFormatter
 
         foreach ($tokens as $token) {
             // Skip comment tokens
-            if (in_array($token['type'], array('comment', 'block comment'))) {
+            if ($token['type'] === 'comment' || $token['type'] === 'block comment') {
                 continue;
             }
 
@@ -628,7 +626,7 @@ class SqlFormatter
      *
      * @return int The comparison of the string lengths
      */
-    private static function sortLength ($a, $b)
+    private static function sortLength($a, $b)
     {
         return strlen($b) - strlen($a);
     }
