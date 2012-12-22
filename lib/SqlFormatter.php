@@ -8,7 +8,7 @@
  * @copyright  2012 Jeremy Dorn
  * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @link       http://github.com/jdorn/sql-formatter
- * @version    1.1.0
+ * @version    1.2.0
  */
 class SqlFormatter
 {
@@ -76,6 +76,26 @@ class SqlFormatter
     // This is a combination of all the boundary characters and all the whitespace characters
     protected static $all_boundaries;
 
+    //cache variables
+    //Only tokens shorter than this size will be cached.  Somewhere between 10 and 20 seems to work well for most cases.
+    public static $max_cachekey_size = 15;
+    protected static $token_cache = array();
+    protected static $cache_hits = 0;
+    protected static $cache_misses = 0;
+    
+    /**
+     * Get stats about the token cache
+     * @return Array An array containing the keys 'hits', 'misses', 'entries', and 'size' in bytes
+     */
+    public static function getCacheStats() {
+        return array(
+            'hits'=>self::$cache_hits,
+            'misses'=>self::$cache_misses,
+            'entries'=>count(self::$token_cache),
+            'size'=>strlen(serialize(self::$token_cache))
+        );
+    }
+    
     /**
      * Return the next token and token type in a SQL string.
      * Quoted strings, comments, reserved words, whitespace, and punctuation are all their own tokens.
@@ -284,21 +304,50 @@ class SqlFormatter
         $old_string_len = strlen($string) + 1;
 
         $token = null;
+        
+        $current_length = strlen($string);
 
         // Keep processing the string until it is empty
-        while (strlen($string)) {
+        while ($current_length) {
             // If the string stopped shrinking, there was a problem
-            if ($old_string_len <= strlen($string)) {
+            if ($old_string_len <= $current_length) {
                 throw new Exception("SQL Parse Error - Unable to tokenize string at character ".($original_length - $old_string_len));
             }
-            $old_string_len = strlen($string);
+            $old_string_len =  $current_length;
 
-            // Get the next token and the token type
-            $token = self::getNextToken($string, $token);
+            // Determine if we can use caching
+            if($current_length >= self::$max_cachekey_size) {
+                $cacheKey = substr($string,0,self::$max_cachekey_size);
+            }
+            else {
+                $cacheKey = false;
+            }
+
+            // See if the token is already cached
+            if($cacheKey && isset(self::$token_cache[$cacheKey])) {
+                //retrieve from cache
+                $token = self::$token_cache[$cacheKey];
+                $token_length = strlen($token['token']);
+                self::$cache_hits++;
+            }
+            else {
+                // Get the next token and the token type
+                $token = self::getNextToken($string, $token);
+                $token_length = strlen($token['token']);
+                self::$cache_misses++;
+                
+                // If the token is shorter than the max length, store it in cache
+                if($cacheKey && $token_length < self::$max_cachekey_size) {
+                    self::$token_cache[$cacheKey] = $token;
+                }
+            }
+            
             $tokens[] = $token;
 
             //advance the string
-            $string = substr($string, strlen($token['token']));
+            $string = substr($string, $token_length);
+            
+            $current_length -= $token_length;
         }
 
         return $tokens;
