@@ -76,6 +76,10 @@ class SqlFormatter
     // This is a combination of all the boundary characters and all the whitespace characters
     protected static $all_boundaries;
 
+    protected static $tokenizeCache = array();
+
+    protected static $nextTokenCache = array();
+
     /**
      * Return the next token and token type in a SQL string.
      * Quoted strings, comments, reserved words, whitespace, and punctuation are all their own tokens.
@@ -87,6 +91,10 @@ class SqlFormatter
      */
     protected static function getNextToken($string, $previous = null)
     {
+        if (isset(self::$nextTokenCache[$string])) {
+            return self::$nextTokenCache[$string];
+        }
+
         // If the next token is a comment
         if (substr($string, 0, 2) === '--' || $string[0] === '#' || substr($string, 0, 2) === '/*') {
             // Comment until end of line
@@ -103,7 +111,7 @@ class SqlFormatter
                 $last = strlen($string);
             }
 
-            return array(
+            return self::$nextTokenCache[$string] = array(
                 'token'=>substr($string, 0, $last),
                 'type'=>$type
             );
@@ -117,7 +125,7 @@ class SqlFormatter
                 if (isset($string[$i + 1])) {
                     $next_char = $string[$i + 1];
                 }
-                
+
                 // Escaped (either backslash or backtick escaped)
                 if (($quote != '`' && $string[$i] === '\\') || ($quote === '`' && $string[$i] === '`' && $next_char === '`')) {
                     $i++;
@@ -127,7 +135,7 @@ class SqlFormatter
             }
             if ($quote === '`') $type = 'backtick quote';
             else $type = 'quote';
-            return array(
+            return self::$nextTokenCache[$string] = array(
                 'token'=>substr($string, 0, $i + 1),
                 'type'=>$type
             );
@@ -138,7 +146,7 @@ class SqlFormatter
             if ($string[0] === '(') {
                 // "()"
                 if (isset($string[1]) && $string[1] === ')') {
-                    return array(
+                    return self::$nextTokenCache[$string] = array(
                         'token'=>'()',
                         'type'=>'word'
                     );
@@ -148,7 +156,7 @@ class SqlFormatter
                 $next_token = self::getNextToken(substr($string, 1));
                 if (isset($string[strlen($next_token['token']) + 1]) && $string[strlen($next_token['token']) + 1] === ')') {
                     if (in_array($next_token['type'], array('word', 'whitespace', 'boundary'))) {
-                        return array(
+                        return self::$nextTokenCache[$string] = array(
                             'token'=>'(' . $next_token['token'] . ')',
                             'type'=>'word'
                         );
@@ -158,7 +166,7 @@ class SqlFormatter
 
             //return single parentheses as their own token
             if ($string[0] === '(' || $string[0] === ')') {
-                return array(
+                return self::$nextTokenCache[$string] = array(
                     'token'=>$string[0],
                     'type'=>$string[0]
                 );
@@ -168,7 +176,7 @@ class SqlFormatter
             // If there are 1 or more boundary characters together, return as a single word
             $next_token = self::getNextToken(substr($string, 1));
             if ($next_token['type'] === 'boundary') {
-                return array(
+                return self::$nextTokenCache[$string] = array(
                     'token'=>$string[0].$next_token['token'],
                     'type'=>'boundary'
                 );
@@ -177,7 +185,7 @@ class SqlFormatter
             // Otherwise, just return the single boundary character
             if ($string[0] === '.' || $string[0] === ',') $type = $string[0];
             else $type = 'boundary';
-            return array(
+            return self::$nextTokenCache[$string] = array(
                 'token'=>$string[0],
                 'type'=>$type
             );
@@ -189,7 +197,7 @@ class SqlFormatter
                 }
             }
 
-            return array(
+            return self::$nextTokenCache[$string] = array(
                 'token'=>substr($string, 0, $i),
                 'type'=>'whitespace'
             );
@@ -217,7 +225,7 @@ class SqlFormatter
 
                     if (in_array($word, self::$special_reserved)) $type = 'special reserved';
                     else $type = 'reserved';
-                    return array(
+                    return self::$nextTokenCache[$string] = array(
                         'token'=> substr($string, 0, strlen($word)),
                         'type'=>$type
                     );
@@ -235,7 +243,7 @@ class SqlFormatter
         $ret = substr($string, 0, $i);
         if (is_numeric($ret)) $type = 'number';
         else $type = 'word';
-        return array(
+        return self::$nextTokenCache[$string] = array(
             'token'=>$ret,
             'type'=>$type
         );
@@ -253,33 +261,43 @@ class SqlFormatter
      */
     protected static function tokenize($string)
     {
+        if (isset(self::$tokenizeCache[$string])) {
+            return self::$tokenizeCache[$string];
+        }
+
         $tokens = array();
 
         //used for debugging if there is an error while tokenizing the string
         $original_length = strlen($string);
 
         //used to make sure the string keeps shrinking on each iteration
-        $old_string_len = strlen($string) + 1;
+        $old_string_len = $original_length + 1;
 
         $token = null;
 
+        $current_length = $original_length;
+
         // Keep processing the string until it is empty
-        while (strlen($string)) {
+        while ($current_length) {
             // If the string stopped shrinking, there was a problem
-            if ($old_string_len <= strlen($string)) {
+            if ($old_string_len <= $current_length) {
                 throw new Exception("SQL Parse Error - Unable to tokenize string at character ".($original_length - $old_string_len));
             }
-            $old_string_len = strlen($string);
+            $old_string_len = $current_length;
 
             // Get the next token and the token type
             $token = self::getNextToken($string, $token);
             $tokens[] = $token;
 
+            $token_length = strlen($token['token']);
+
             //advance the string
-            $string = substr($string,strlen($token['token']));
+            $string = substr($string, $token_length);
+
+            $current_length -= $token_length;
         }
 
-        return $tokens;
+        return self::$tokenizeCache[$string] = $tokens;
     }
 
     /**
