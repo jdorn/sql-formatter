@@ -1,8 +1,9 @@
 SqlFormatter
 =============
 
-A lightweight php class for formatting sql statements.  Handles automatic
-indentation and syntax highlighting.
+A lightweight php class for formatting sql statements.
+
+It can automatically indent and add line breaks in addition to syntax highlighting.
 
 History
 ============
@@ -29,25 +30,77 @@ Sample usage:
 <?php
 require_once('SqlFormatter.php');
 
-echo SqlFormatter::format("SELECT * FROM MyTable LIMIT 10");
+$query = "SELECT count(*),`Column1`,`Testing`, `Testing Three` FROM `Table1`
+    WHERE Column1 = 'testing' AND ( (`Column2` = `Column3` OR Column4 >= NOW()) )
+    GROUP BY Column1 ORDER BY Column3 DESC LIMIT 5,10";
+
+echo SqlFormatter::format($query);
 ```
 
-Sample output:
+Output:
 
-![](http://github.com/jdorn/sql-formatter/raw/master/examples/SqlFormatterExample.png)
+![](http://jdorn.github.com/sql-formatter/format-highlight.png)
+
+Formatting Only
+-------------------------
+If you don't want syntax highlighting and only want the indentations and 
+line breaks, pass in false as the second parameter.
+
+This is useful for outputting to error logs or other non-html formats.
+
+```php
+<?php
+echo SqlFormatter::format($query, false);
+```
+
+Output:
+
+![](http://jdorn.github.com/sql-formatter/format.png)
 
 Syntax Highlighting Only
 -------------------------
 
-There is also a static method 'highlight' that only does syntax highlighting 
-and preserves all original whitespace.
+There is a separate method 'highlight' that preserves all original whitespace
+and just adds syntax highlighting.
 
 This is useful for sql that is already well formatted and just needs to be a little
 easier to read.
 
 ```php
 <?php
-echo SqlFormatter::highlight("SELECT * FROM MyTable LIMIT 10");
+echo SqlFormatter::highlight($query);
+```
+
+Output:
+
+![](http://jdorn.github.com/sql-formatter/highlight.png)
+
+Remove Comments
+------------------------
+
+There is a removeComments method that, you guessed it, removes all comments from a query.
+
+```
+-- This is a comment
+    SELECT
+    /* This is another comment
+    On more than one line */
+    Id #This is one final comment
+    as temp, DateCreated as Created FROM MyTable;
+```
+
+```php
+<?php
+echo SqlFormatter::removeComments($query);
+```
+
+Output:
+```
+
+    SELECT
+    
+    Id 
+    as temp, DateCreated as Created FROM MyTable;
 ```
 
 Split SQL String into Queries
@@ -67,14 +120,26 @@ SELECT * FROM MyTable;
 ```
 
 ```php
+<?php
 $queries = SqlFormatter::splitQuery($sql);
 ```
-$queries is now an array of the 4 queries without trailing semicolons.
 
-Why not just use explode(';',$sql) or regular expressions?  The following example sql and others like it
-are impossible to split correctly using regular expressions.
+Result:
 
-```sql
+1.    `DROP TABLE IF EXISTS MyTable`
+2.    `CREATE TABLE MyTable ( id int )`
+3.    `INSERT INTO MyTable (id) VALUES (1),(2),(3),(4)`
+4.    `SELECT * FROM MyTable`
+
+Please note that splitQuery also removes comments and all trailing semicolons.
+
+### Why Not Regular Expressions?
+
+Why not just use `explode(';', $sql)` or a regular expression?
+
+The following example sql and others like it are _impossible_ to split correctly using regular expressions, no matter how complex.  
+
+```
 SELECT ";"; SELECT ";\"; a;";
 SELECT ";
     abc";
@@ -82,6 +147,14 @@ SELECT a,b #comment;
 FROM test;
 ```
 
-The splitQuery method will still fail in the following cases:
+SqlFormatter breaks the string into tokens instead of using regular expressions and will correctly produce:
+
+1.    `SELECT ";"`
+2.    `SELECT ";\"; a;"`
+3.    `SELECT "; abc"`
+4.    `SELECT a,b FROM test`
+
+Please note, the splitQuery method will still fail in the following cases:
 *    The DELIMITER command can be used to change the delimiter from the default ';' to something else.  
-*    The CREATE PROCEDURE command
+*    The CREATE PROCEDURE command has a ';' in the middle of it
+*    The USE command is not terminated with a ';'
