@@ -5,6 +5,7 @@
  *
  * @package    SqlFormatter
  * @author     Jeremy Dorn <jeremy@jeremydorn.com>
+ * @author     Florin Patan <florinpatan@gmail.com>
  * @copyright  2012 Jeremy Dorn
  * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @link       http://github.com/jdorn/sql-formatter
@@ -76,13 +77,21 @@ class SqlFormatter
     // This is a combination of all the boundary characters and all the whitespace characters
     protected static $all_boundaries;
 
+    protected static $reserved_lengths = array();
+
+    /**
+     * Regex that holds the list of all delimiters
+     * @var string
+     */
+    protected static $regex_boundry = '';
+
     //cache variables
     //Only tokens shorter than this size will be cached.  Somewhere between 10 and 20 seems to work well for most cases.
     public static $max_cachekey_size = 15;
     protected static $token_cache = array();
     protected static $cache_hits = 0;
     protected static $cache_misses = 0;
-    
+
     /**
      * Get stats about the token cache
      * @return Array An array containing the keys 'hits', 'misses', 'entries', and 'size' in bytes
@@ -95,20 +104,57 @@ class SqlFormatter
             'size'=>strlen(serialize(self::$token_cache))
         );
     }
-    
+
+    /**
+     * Perform various operations to initialize the library
+     */
+    protected static function init()
+    {
+        if (self::$init) {
+            return;
+        }
+
+        //Sort reserved word list from longest word to shortest
+        usort(self::$reserved, array('SqlFormatter', 'sortLength'));
+
+        //Combine boundary characters and whitespace
+        self::$all_boundaries = array_merge(self::$boundaries, self::$whitespace);
+
+        uksort(self::$all_boundaries, array('SqlFormatter', 'sortLength'));
+
+        self::$regex_boundry = '/.*?(?=' . '(\\' . implode('|\\', self::$all_boundaries) . ')' . ')/i';
+
+        foreach(self::$reserved as $keyword) {
+            self::$reserved_lengths[$keyword] = strlen($keyword);
+        }
+
+        foreach(self::$special_reserved as $keyword) {
+            self::$reserved_lengths[$keyword] = strlen($keyword);
+        }
+
+        uksort(self::$reserved_lengths, array('SqlFormatter', 'sortLength'));
+
+        self::$init = true;
+    }
+
     /**
      * Return the next token and token type in a SQL string.
      * Quoted strings, comments, reserved words, whitespace, and punctuation are all their own tokens.
      *
      * @param String $string The SQL string
      * @param array $previous The result of the previous getNextToken() call
+     * @param int|null $len
      *
      * @return Array An associative array containing a 'token' and 'type' key.
      */
-    protected static function getNextToken($string, $previous = null)
+    protected static function getNextToken($string, $previous = null, $len = null)
     {
+        if ($len === null) {
+            $len = strlen($string);
+        }
+
         // If the next token is a comment
-        if ($string[0] === '#' || substr($string, 0, 2) === '--' || substr($string, 0, 2) === '/*') {
+        if ($string[0] === '#' || ($string[0] == '-' && $string[1] == '-') || ($string[0] == '/' && $string[1] == '*')) {
             // Comment until end of line
             if ($string[0] === '-' || $string[0] === '#') {
                 $last = strpos($string, "\n");
@@ -119,7 +165,7 @@ class SqlFormatter
             }
 
             if ($last === false) {
-                $last = strlen($string);
+                $last = $len;
             }
 
             return array(
@@ -131,9 +177,10 @@ class SqlFormatter
         // If the next item is a string
         if (in_array($string[0], self::$quotes)) {
             $quote = $string[0];
-            for ($i = 1, $length = strlen($string); $i < $length; $i++) {
+            $length = $len;
+            for ($i = 1; $i < $length; $i++) {
                 $next_char = null;
-                if (isset($string[$i + 1])) {
+                if ($i < $length -1) {
                     $next_char = $string[$i + 1];
                 }
 
@@ -170,7 +217,7 @@ class SqlFormatter
                 }
 
                 // "(word/whitespace/boundary)"
-                $next_token = self::getNextToken(substr($string, 1));
+                $next_token = self::getNextToken(substr($string, 1), null, $len - 1);
                 $length = strlen($next_token['token']);
                 if (isset($string[$length + 1]) && $string[$length + 1] === ')') {
                     if ($next_token['type'] === 'word' || $next_token['type'] === 'whitespace' || $next_token['type'] === 'boundary') {
@@ -192,7 +239,7 @@ class SqlFormatter
 
 
             // If there are 1 or more boundary characters together, return as a single word
-            $next_token = self::getNextToken(substr($string, 1));
+            $next_token = self::getNextToken(substr($string, 1), null, $len - 1);
             if ($next_token['type'] === 'boundary') {
                 return array(
                     'token' => $string[0].$next_token['token'],
@@ -215,7 +262,8 @@ class SqlFormatter
 
         // Whitespace
         if (in_array($string[0], self::$whitespace)) {
-            for ($i = 1, $length = strlen($string); $i < $length; $i++) {
+            $length = $len;
+            for ($i = 1; $i < $length; $i++) {
                 if (!in_array($string[$i], self::$whitespace)) {
                     break;
                 }
@@ -227,44 +275,59 @@ class SqlFormatter
             );
         }
 
-        if (!self::$init) {
-            //Sort reserved word list from longest word to shortest
-            usort(self::$reserved, array('SqlFormatter', 'sortLength'));
-
-            //Combine boundary characters and whitespace
-            self::$all_boundaries = array_merge(self::$boundaries, self::$whitespace);
-
-            self::$init = true;
-        }
-
         //a reserved word cannot be preceded by a '.'
         //this makes it so in "mytable.from", "from" is not considered a reserved word
         if (!$previous || !isset($previous['token']) || $previous['token'] !== '.') {
             // Reserved word
-            $test = strtoupper($string);
-            foreach (self::$reserved as $word) {
-                $length = strlen($word);
-                if (substr($test, 0, $length) === $word) {
-                    if (isset($string[$length]) && !in_array($string[$length], self::$all_boundaries)) {
-                        continue;
-                    }
+            $startPos = 0;
 
-                    if (in_array($word, self::$special_reserved)) {
-                        $type = 'special reserved';
-                    } else {
-                        $type = 'reserved';
-                    }
+            $termUsed = '';
 
-                    return array(
-                        'token' => substr($string, 0, $length),
-                        'type'  => $type
-                    );
+            while (true) {
+                if (!preg_match(self::$regex_boundry, $string, $matches, 0, $startPos)) {
+                    break;
                 }
+
+                if (!isset(self::$reserved_lengths[$matches[0]])) {
+                    break;
+                }
+
+                $length = strlen($matches[0]);
+
+                if ($length <= $len && !in_array($string[$length], self::$all_boundaries)) {
+                    $startPos = $length + 1;
+
+                    if ($startPos == $len) {
+                        break;
+                    }
+
+                    $termUsed .= $matches[0] . $matches[1];
+
+                    continue;
+                }
+
+                if ($termUsed == '') {
+                    $termUsed .= $matches[0];
+                } else {
+                    $termUsed .= $matches[0] . $matches[1];
+                }
+
+                if (in_array($matches[0], self::$special_reserved)) {
+                    $type = 'special reserved';
+                } else {
+                    $type = 'reserved';
+                }
+
+                return array(
+                    'token' => $termUsed,
+                    'type'  => $type
+                );
             }
         }
 
         // Look for first word separator
-        for ($i = 1, $length = strlen($string); $i < $length; $i++) {
+        $length = $len;
+        for ($i = 1; $i < $length; $i++) {
             if (in_array($string[$i], self::$all_boundaries)) {
                 break;
             }
@@ -295,6 +358,8 @@ class SqlFormatter
      */
     protected static function tokenize($string)
     {
+        self::init();
+
         $tokens = array();
 
         //used for debugging if there is an error while tokenizing the string
@@ -304,7 +369,7 @@ class SqlFormatter
         $old_string_len = strlen($string) + 1;
 
         $token = null;
-        
+
         $current_length = strlen($string);
 
         // Keep processing the string until it is empty
@@ -335,18 +400,18 @@ class SqlFormatter
                 $token = self::getNextToken($string, $token);
                 $token_length = strlen($token['token']);
                 self::$cache_misses++;
-                
+
                 // If the token is shorter than the max length, store it in cache
                 if($cacheKey && $token_length < self::$max_cachekey_size) {
                     self::$token_cache[$cacheKey] = $token;
                 }
             }
-            
+
             $tokens[] = $token;
 
             //advance the string
             $string = substr($string, $token_length);
-            
+
             $current_length -= $token_length;
         }
 
