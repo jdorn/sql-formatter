@@ -9,7 +9,7 @@
  * @copyright  2012 Jeremy Dorn
  * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @link       http://github.com/jdorn/sql-formatter
- * @version    1.2.1
+ * @version    1.2.2
  */
 class SqlFormatter
 {
@@ -103,7 +103,7 @@ class SqlFormatter
         // Set up regular expressions
         self::$regex_boundaries = '('.implode('|',array_map(array('SqlFormatter', 'quote_regex'),self::$boundaries)).')';
         self::$regex_reserved = '('.implode('|',array_map(array('SqlFormatter', 'quote_regex'),self::$reserved)).')';
-        self::$regex_special_reserved = str_replace(' ','\\s','('.implode('|',array_map(array('SqlFormatter', 'quote_regex'),self::$special_reserved)).')');
+        self::$regex_special_reserved = str_replace(' ','\\s+','('.implode('|',array_map(array('SqlFormatter', 'quote_regex'),self::$special_reserved)).')');
 
         self::$init = true;
     }
