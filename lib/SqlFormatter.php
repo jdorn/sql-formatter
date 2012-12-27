@@ -102,7 +102,7 @@ class SqlFormatter
 
         // Set up regular expressions
         self::$regex_boundaries = '('.implode('|',array_map(array('SqlFormatter', 'quote_regex'),self::$boundaries)).')';
-        self::$regex_reserved = str_replace(' ','\\s','('.implode('|',array_map(array('SqlFormatter', 'quote_regex'),self::$reserved)).')');
+        self::$regex_reserved = '('.implode('|',array_map(array('SqlFormatter', 'quote_regex'),self::$reserved)).')';
         self::$regex_special_reserved = str_replace(' ','\\s','('.implode('|',array_map(array('SqlFormatter', 'quote_regex'),self::$special_reserved)).')');
 
         self::$init = true;
@@ -189,15 +189,16 @@ class SqlFormatter
         // A reserved word cannot be preceded by a '.'
         // this makes it so in "mytable.from", "from" is not considered a reserved word
         if (!$previous || !isset($previous['token']) || $previous['token'] !== '.') {
+            $upper = strtoupper($string);
             // Special Reserved Word
-            if(preg_match('/^('.self::$regex_special_reserved.')($|\s|'.self::$regex_boundaries.')/', strtoupper($string),$matches)) {
+            if(preg_match('/^('.self::$regex_special_reserved.')($|\s|'.self::$regex_boundaries.')/', $upper,$matches)) {
                 return array(
                     'type'=>'special reserved',
                     'token'=>substr($string,0,strlen($matches[1]))
                 );
             }
             // Other Reserved Word
-            if(preg_match('/^('.self::$regex_reserved.')($|\s|'.self::$regex_boundaries.')/', strtoupper($string),$matches)) {
+            if(preg_match('/^('.self::$regex_reserved.')($|\s|'.self::$regex_boundaries.')/', $upper,$matches)) {
                 return array(
                     'type'=>'reserved',
                     'token'=>substr($string,0,strlen($matches[1]))
@@ -477,6 +478,11 @@ class SqlFormatter
                 // Add a newline before the special reserved word (if not already added)
                 if(!$added_newline) {
                     $return .= "\n" . str_repeat($tab, $indent_level);
+                }
+
+                // If the token may have extra whitespace
+                if (strpos($token['token'],' ')!==false || strpos($token['token'],"\n")!==false || strpos($token['token'],"\t")!==false) {
+                    $highlighted = preg_replace('/\s+/',' ',$highlighted);
                 }
             }
 
