@@ -43,7 +43,7 @@ class SqlFormatter
     // These keywords will all be on their own line
     protected static $special_reserved = array(
         'SELECT', 'FROM', 'WHERE', 'SET', 'ORDER BY', 'GROUP BY', 'LEFT JOIN', 'OUTER JOIN', 'INNER JOIN', 'RIGHT JOIN', 'JOIN', 'LIMIT',
-        'VALUES', 'UPDATE', 'HAVING', 'ADD', 'AFTER', 'ALTER TABLE', 'INSERT INTO', 'DELETE FROM', 'INSERT IGNORE INTO'
+        'VALUES', 'UPDATE', 'HAVING', 'ADD', 'AFTER', 'ALTER TABLE', 'DELETE FROM'
     );
 
     // Punctuation that can be used as a boundary between other tokens
