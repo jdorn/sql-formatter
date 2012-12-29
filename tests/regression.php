@@ -8,13 +8,14 @@ $contents = file_get_contents('sql.sql');
 //queries are separated by 2 new lines
 $queries = explode("\n\n",$contents);
 
-$output = "";
+$output = "<ol>\n";
 
 foreach ($queries as $query) {
 	//do formatting and highlighting
-	$output .= SqlFormatter::format($query);
-	$output .= "\n";
+	$output .= "<li>".SqlFormatter::format($query)."</li>\n\n";
 }
+
+$output .= "</ol>";
 
 $expected = file_get_contents('expected.html');
 

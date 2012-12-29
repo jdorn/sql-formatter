@@ -35,7 +35,7 @@ class SqlFormatter
         'SERIALIZABLE', 'SESSION', 'SET', 'SHARE', 'SHOW', 'SHUTDOWN', 'SLAVE', 'SONAME', 'SOUNDS', 'SQL',
         'SQL_CACHE', 'SQL_NO_CACHE', 'START', 'STARTING', 'STATUS', 'STOP', 'STORAGE',
         'STRAIGHT_JOIN', 'STRING', 'SUPER', 'TABLE', 'TABLES', 'TEMPORARY', 'TERMINATED', 'THEN', 'TO', 'TRAILING', 'TRANSACTIONAL',
-        'TRUNCATE', 'TYPE', 'TYPES', 'UNCOMMITTED', 'UNION', 'UNIQUE', 'UNLOCK', 'UNSIGNED', 'USAGE', 'USE', 'USING', 'VARIABLES',
+        'TRUNCATE', 'TYPE', 'TYPES', 'UNCOMMITTED', 'UNIQUE', 'UNLOCK', 'UNSIGNED', 'USAGE', 'USE', 'USING', 'VARIABLES',
         'VIEW', 'WHEN', 'WITH', 'WORK', 'WRITE', 'XOR', 'YEAR_MONTH'
     );
 
@@ -43,7 +43,7 @@ class SqlFormatter
     // These keywords will all be on their own line
     protected static $special_reserved = array(
         'SELECT', 'FROM', 'WHERE', 'SET', 'ORDER BY', 'GROUP BY', 'LEFT JOIN', 'OUTER JOIN', 'INNER JOIN', 'RIGHT JOIN', 'JOIN', 'LIMIT',
-        'VALUES', 'UPDATE', 'HAVING', 'ADD', 'AFTER', 'ALTER TABLE', 'DELETE FROM'
+        'VALUES', 'UPDATE', 'HAVING', 'ADD', 'AFTER', 'ALTER TABLE', 'DELETE FROM', 'UNION ALL', 'UNION', 'EXCEPT', 'INTERSECT'
     );
 
     // Punctuation that can be used as a boundary between other tokens
@@ -478,6 +478,10 @@ class SqlFormatter
                 // Add a newline before the special reserved word (if not already added)
                 if(!$added_newline) {
                     $return .= "\n" . str_repeat($tab, $indent_level);
+                }
+                // If we already added a newline, redo the indentation since it may be different now
+                else {
+                    $return = rtrim($return,$tab).str_repeat($tab, $indent_level);
                 }
 
                 // If the token may have extra whitespace
