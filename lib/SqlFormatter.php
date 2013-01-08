@@ -9,7 +9,7 @@
  * @copyright  2012 Jeremy Dorn
  * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @link       http://github.com/jdorn/sql-formatter
- * @version    1.2.2
+ * @version    1.2.3
  */
 class SqlFormatter
 {
@@ -154,7 +154,7 @@ class SqlFormatter
             // 1. backtick quoted string using `` to escape
             // 2. double quoted string using "" or \" to escape
             // 3. single quoted string using '' or \' to escape
-            if( preg_match('/^((`(?:[^`]|``)*`)|("((?:[^"\\\\]|"")|(?:[^"\\\\]|\\\\.))*")|(\'((?:[^\'\\\\]|\'\')|(?:[^\'\\\\]|\\\\.))*\'))/', $string, $matches)) {
+            if( preg_match('/^((`(?:[^`]|``)*($|`))|("((?:[^"\\\\]|"")|(?:[^"\\\\]|\\\\.))*($|"))|(\'((?:[^\'\\\\]|\'\')|(?:[^\'\\\\]|\\\\.))*($|\')))/', $string, $matches)) {
                 if($string[0]==='`') {
                     return array(
                         'token'=>$matches[1],
@@ -221,8 +221,6 @@ class SqlFormatter
      *
      * @param String $string The SQL string
      *
-     * @throws Exception when there is a problem tokenizing the input string
-     *
      * @return Array An array of tokens.
      */
     protected static function tokenize($string)
@@ -245,7 +243,12 @@ class SqlFormatter
         while ($current_length) {
             // If the string stopped shrinking, there was a problem
             if ($old_string_len <= $current_length) {
-                throw new Exception("SQL Parse Error - Unable to tokenize string at character ".($original_length - $old_string_len));
+                $tokens[] = array(
+                    'token'=>$string,
+                    'type'=>'error'
+                );
+                
+                return $tokens;
             }
             $old_string_len =  $current_length;
 
@@ -292,8 +295,6 @@ class SqlFormatter
      *
      * @param String  $string    The SQL string
      * @param boolean $highlight If true, syntax highlighting will also be performed
-     *
-     * @throws Exception when there is a problem tokenizing the input string
      *
      * @return String The SQL string with HTML styles and formatting wrapped in a <pre> tag
      */
@@ -523,8 +524,6 @@ class SqlFormatter
      *
      * @param String $string The SQL string
      *
-     * @throws Exception when there is a problem tokenizing the input string
-     *
      * @return String The SQL string with HTML styles applied
      */
     public static function highlight($string)
@@ -545,8 +544,6 @@ class SqlFormatter
      * Uses ";" as a query delimiter.
      *
      * @param String $string The SQL string
-     *
-     * @throws Exception when there is a problem tokenizing the input string
      *
      * @return Array An array of individual query strings without trailing semicolons
      */
@@ -584,8 +581,6 @@ class SqlFormatter
      * Remove all comments from a SQL string
      *
      * @param String $string The SQL string
-     *
-     * @throws Exception when there is a problem tokenizing the input string
      *
      * @return String The SQL string without comments
      */
@@ -626,10 +621,10 @@ class SqlFormatter
             return self::highlightDefault($token);
         }
         elseif($type==='backtick quote') {
-            return self::highlightQuote($token, $type);
+            return self::highlightBacktickQuote($token);
         }
         elseif($type==='quote') {
-            return self::highlightQuote($token, $type);
+            return self::highlightQuote($token);
         }
         elseif($type==='reserved') {
             return self::highlightReservedWord($token);
@@ -651,17 +646,23 @@ class SqlFormatter
      * Highlights a quoted string
      *
      * @param String $value The token's value
-     * @param String $type  The token's type
      *
      * @return String HTML code of the highlighted token.
      */
-    protected static function highlightQuote($value, $type)
+    protected static function highlightQuote($value)
     {
-        if ($type === 'backtick quote') {
-            return '<span style=\'' . self::$backtick_quote_style . '\'>' . $value . "</span>";
-        }
+        return '<span style=\'' . self::$quote_style . '\'>' . $value . '</span>';
+    }
 
-        return '<span style=\'' . self::$quote_style . '\'>' . $value . "</span>";
+    /**
+     * Highlights a backtick quoted string
+     *
+     * @param String $value The token's value
+     *
+     * @return String HTML code of the highlighted token.
+     */
+    protected static function highlightBacktickQuote($value) {
+        return '<span style=\'' . self::$backtick_quote_style . '\'>' . $value . '</span>';
     }
 
     /**
@@ -673,7 +674,7 @@ class SqlFormatter
      */
     protected static function highlightReservedWord($value)
     {
-        return '<span style=\'' . self::$reserved_style . '\'>' . $value . "</span>";
+        return '<span style=\'' . self::$reserved_style . '\'>' . $value . '</span>';
     }
 
     /**
@@ -687,7 +688,7 @@ class SqlFormatter
     {
         if($value==='(' || $value===')') return $value;
         
-        return '<span style=\'' . self::$boundary_style . '\'>' . $value . "</span>";
+        return '<span style=\'' . self::$boundary_style . '\'>' . $value . '</span>';
     }
 
     /**
@@ -699,7 +700,7 @@ class SqlFormatter
      */
     protected static function highlightNumber($value)
     {
-        return '<span style=\'' . self::$number_style . '\'>' . $value . "</span>";
+        return '<span style=\'' . self::$number_style . '\'>' . $value . '</span>';
     }
 
     /**
@@ -711,7 +712,7 @@ class SqlFormatter
      */
     protected static function highlightError($value)
     {
-        return '<span style=\'' . self::$error_style . '\'>' . $value . "</span>";
+        return '<span style=\'' . self::$error_style . '\'>' . $value . '</span>';
     }
 
     /**
@@ -723,7 +724,7 @@ class SqlFormatter
      */
     protected static function highlightComment($value)
     {
-        return '<span style=\'' . self::$comment_style . '\'>' . $value . "</span>";
+        return '<span style=\'' . self::$comment_style . '\'>' . $value . '</span>';
     }
 
     /**
@@ -735,7 +736,7 @@ class SqlFormatter
      */
     protected static function highlightDefault($value)
     {
-        return '<span style=\'' . self::$default_style . '\'>' . $value . "</span>";
+        return '<span style=\'' . self::$default_style . '\'>' . $value . '</span>';
     }
 
     /**
