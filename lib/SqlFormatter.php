@@ -6,10 +6,10 @@
  * @package    SqlFormatter
  * @author     Jeremy Dorn <jeremy@jeremydorn.com>
  * @author     Florin Patan <florinpatan@gmail.com>
- * @copyright  2012 Jeremy Dorn
+ * @copyright  2013 Jeremy Dorn
  * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @link       http://github.com/jdorn/sql-formatter
- * @version    1.2.3
+ * @version    1.2.4
  */
 class SqlFormatter
 {
@@ -51,14 +51,15 @@ class SqlFormatter
 
     // For syntax highlighting
     // Styles applied to different token types
-    public static $quote_style = 'color: blue;';
-    public static $backtick_quote_style = 'color: purple;';
-    public static $reserved_style = 'color:black; font-weight:bold;';
-    public static $boundary_style = 'color:black;';
-    public static $number_style = 'color: green;';
-    public static $default_style = 'color: #333;';
-    public static $error_style = 'background-color: red; color: black;';
-    public static $comment_style = 'color: #aaa;';
+    public static $quote_attributes = 'style="color: blue;"';
+    public static $backtick_quote_attributes = 'style="color: purple;"';
+    public static $reserved_attributes = 'style="font-weight:bold;"';
+    public static $boundary_attributes = '';
+    public static $number_attributes = 'style="color: green;"';
+    public static $word_attributes = 'style="color: #333;"';
+    public static $error_attributes = 'style="background-color: red;"';
+    public static $comment_attributes = 'style="color: #aaa;"';
+    public static $pre_attributes = 'style="color: black; background-color: white;"';
 
     // The tab character to use when formatting SQL
     public static $tab = '  ';
@@ -513,7 +514,7 @@ class SqlFormatter
         $return = trim(str_replace("\t",self::$tab,$return));
 
         if ($highlight) {
-            $return = "<pre style='background:white;'>" . $return . "</pre>";
+            $return = "<pre ".self::$pre_attributes.">" . $return . "</pre>";
         }
 
         return $return;       
@@ -536,7 +537,7 @@ class SqlFormatter
             $return .= self::highlightToken($token);
         }
 
-        return "<pre style='background:white;'>" . trim($return) . "</pre>";
+        return "<pre ".self::$pre_attributes.">" . trim($return) . "</pre>";
     }
 
     /**
@@ -618,7 +619,7 @@ class SqlFormatter
             return self::highlightBoundary($token);
         }
         elseif($type==='word') {
-            return self::highlightDefault($token);
+            return self::highlightWord($token);
         }
         elseif($type==='backtick quote') {
             return self::highlightBacktickQuote($token);
@@ -651,7 +652,7 @@ class SqlFormatter
      */
     protected static function highlightQuote($value)
     {
-        return '<span style=\'' . self::$quote_style . '\'>' . $value . '</span>';
+        return '<span ' . self::$quote_attributes . '>' . $value . '</span>';
     }
 
     /**
@@ -662,7 +663,7 @@ class SqlFormatter
      * @return String HTML code of the highlighted token.
      */
     protected static function highlightBacktickQuote($value) {
-        return '<span style=\'' . self::$backtick_quote_style . '\'>' . $value . '</span>';
+        return '<span ' . self::$backtick_quote_attributes . '>' . $value . '</span>';
     }
 
     /**
@@ -674,7 +675,7 @@ class SqlFormatter
      */
     protected static function highlightReservedWord($value)
     {
-        return '<span style=\'' . self::$reserved_style . '\'>' . $value . '</span>';
+        return '<span ' . self::$reserved_attributes . '>' . $value . '</span>';
     }
 
     /**
@@ -688,7 +689,7 @@ class SqlFormatter
     {
         if($value==='(' || $value===')') return $value;
         
-        return '<span style=\'' . self::$boundary_style . '\'>' . $value . '</span>';
+        return '<span ' . self::$boundary_attributes . '>' . $value . '</span>';
     }
 
     /**
@@ -700,7 +701,7 @@ class SqlFormatter
      */
     protected static function highlightNumber($value)
     {
-        return '<span style=\'' . self::$number_style . '\'>' . $value . '</span>';
+        return '<span ' . self::$number_attributes . '>' . $value . '</span>';
     }
 
     /**
@@ -712,7 +713,7 @@ class SqlFormatter
      */
     protected static function highlightError($value)
     {
-        return '<span style=\'' . self::$error_style . '\'>' . $value . '</span>';
+        return '<span ' . self::$error_attributes . '>' . $value . '</span>';
     }
 
     /**
@@ -724,19 +725,19 @@ class SqlFormatter
      */
     protected static function highlightComment($value)
     {
-        return '<span style=\'' . self::$comment_style . '\'>' . $value . '</span>';
+        return '<span ' . self::$comment_attributes . '>' . $value . '</span>';
     }
 
     /**
-     * Highlights a generic token
+     * Highlights a word token
      *
      * @param String $value The token's value
      *
      * @return String HTML code of the highlighted token.
      */
-    protected static function highlightDefault($value)
+    protected static function highlightWord($value)
     {
-        return '<span style=\'' . self::$default_style . '\'>' . $value . '</span>';
+        return '<span ' . self::$word_attributes . '>' . $value . '</span>';
     }
 
     /**
