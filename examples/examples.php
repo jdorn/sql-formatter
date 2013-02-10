@@ -74,6 +74,20 @@ $split_statements = array(
         abc\";
     SELECT a,b #comment;
     FROM test;",
+    
+    "
+    -- Drop the table first if it exists
+    DROP TABLE IF EXISTS MyTable;
+
+    -- Create the table
+    CREATE TABLE MyTable ( id int );
+
+    -- Insert values
+    INSERT INTO MyTable (id)
+        VALUES
+        (1),(2),(3),(4);
+
+    -- Done",
 );
 
 // Example statements for removing comments

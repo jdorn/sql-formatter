@@ -550,28 +550,32 @@ class SqlFormatter
      */
     public static function splitQuery($string)
     {
-        // Comments between queries cause problems, so remove them first
-        $string = self::removeComments($string);
-
         $queries = array();
         $current_query = '';
+        $empty = true;
 
         $tokens = self::tokenize($string);
-
-        foreach ($tokens as $token) {
+        
+        foreach ($tokens as $token) {            
             // If this is a query separator
             if ($token['token'] === ';') {
-                if (trim($current_query)) {
-                    $queries[] = trim($current_query);
+                if (!$empty) {
+                    $queries[] = $current_query.';';
                 }
                 $current_query = '';
+                $empty = true;
                 continue;
+            }
+            
+            // If this is a non-empty character
+            if($token['type'] !== 'whitespace' && $token['type'] !== 'comment' && $token['type'] !== 'block comment') {
+                $empty = false;
             }
 
             $current_query .= $token['token'];
         }
 
-        if (trim($current_query)) {
+        if (!$empty) {
             $queries[] = trim($current_query);
         }
 

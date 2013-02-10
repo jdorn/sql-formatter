@@ -126,12 +126,10 @@ $queries = SqlFormatter::splitQuery($sql);
 
 Result:
 
-1.    `DROP TABLE IF EXISTS MyTable`
-2.    `CREATE TABLE MyTable ( id int )`
-3.    `INSERT INTO MyTable (id) VALUES (1),(2),(3),(4)`
-4.    `SELECT * FROM MyTable`
-
-Please note that splitQuery also removes comments and all trailing semicolons.
+1.    `DROP TABLE IF EXISTS MyTable`;
+2.    `CREATE TABLE MyTable ( id int )`;
+3.    `INSERT INTO MyTable (id) VALUES (1),(2),(3),(4)`;
+4.    `SELECT * FROM MyTable`;
 
 ### Why Not Regular Expressions?
 
@@ -149,10 +147,11 @@ FROM test;
 
 SqlFormatter breaks the string into tokens instead of using regular expressions and will correctly produce:
 
-1.    `SELECT ";"`
-2.    `SELECT ";\"; a;"`
-3.    `SELECT "; abc"`
-4.    `SELECT a,b FROM test`
+1.    `SELECT ";"`;
+2.    `SELECT ";\"; a;"`;
+3.    `SELECT "; abc"`;
+4.    `SELECT a,b #comment;
+FROM test`;
 
 Please note, the splitQuery method will still fail in the following cases:
 *    The DELIMITER command can be used to change the delimiter from the default ';' to something else.  
