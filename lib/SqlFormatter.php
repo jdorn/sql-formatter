@@ -9,10 +9,27 @@
  * @copyright  2013 Jeremy Dorn
  * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @link       http://github.com/jdorn/sql-formatter
- * @version    1.2.4
+ * @version    1.2.5
  */
 class SqlFormatter
 {
+    // Constants for token types
+    const TOKEN_TYPE_WHITESPACE = 0;
+    const TOKEN_TYPE_WORD = 1;
+    const TOKEN_TYPE_QUOTE = 2;
+    const TOKEN_TYPE_BACKTICK_QUOTE = 3;
+    const TOKEN_TYPE_RESERVED = 4;
+    const TOKEN_TYPE_SPECIAL_RESERVED = 5;
+    const TOKEN_TYPE_BOUNDARY = 6;
+    const TOKEN_TYPE_COMMENT = 7;
+    const TOKEN_TYPE_BLOCK_COMMENT = 8;
+    const TOKEN_TYPE_NUMBER = 9;
+    const TOKEN_TYPE_ERROR = 10;
+    
+    // Constants for different components of a token
+    const TOKEN_TYPE = 0;
+    const TOKEN_VALUE = 1;
+    
     // Reserved words (for syntax highlighting)
     protected static $reserved = array(
         'ACCESSIBLE', 'ACTION', 'AGAINST', 'AGGREGATE', 'ALGORITHM', 'ALL', 'ALTER', 'ANALYSE', 'ANALYZE', 'AND', 'AS', 'ASC',
@@ -116,15 +133,15 @@ class SqlFormatter
      * @param String $string The SQL string
      * @param array $previous The result of the previous getNextToken() call
      *
-     * @return Array An associative array containing a 'token' and 'type' key.
+     * @return Array An associative array containing the type and value of the token.
      */
     protected static function getNextToken($string, $previous = null)
     {
         // Whitespace
         if (preg_match('/^\s+/',$string,$matches)) {
             return array(
-                'token' => $matches[0],
-                'type'=>'whitespace'
+                self::TOKEN_VALUE => $matches[0],
+                self::TOKEN_TYPE=>self::TOKEN_TYPE_WHITESPACE
             );
         }
        
@@ -133,10 +150,10 @@ class SqlFormatter
             // Comment until end of line
             if ($string[0] === '-' || $string[0] === '#') {
                 $last = strpos($string, "\n");
-                $type = 'comment';
+                $type = self::TOKEN_TYPE_COMMENT;
             } else { // Comment until closing comment tag
                 $last = strpos($string, "*/", 2) + 2;
-                $type = 'block comment';
+                $type = self::TOKEN_TYPE_BLOCK_COMMENT;
             }
 
             if ($last === false) {
@@ -144,8 +161,8 @@ class SqlFormatter
             }
 
             return array(
-                'token' => substr($string, 0, $last),
-                'type'  => $type
+                self::TOKEN_VALUE => substr($string, 0, $last),
+                self::TOKEN_TYPE  => $type
             );
         }
 
@@ -158,14 +175,14 @@ class SqlFormatter
             if( preg_match('/^((`(?:[^`]|``)*($|`))|("((?:[^"\\\\]|"")|(?:[^"\\\\]|\\\\.))*($|"))|(\'((?:[^\'\\\\]|\'\')|(?:[^\'\\\\]|\\\\.))*($|\')))/', $string, $matches)) {
                 if($string[0]==='`') {
                     return array(
-                        'token'=>$matches[1],
-                        'type'=>'backtick quote'
+                        self::TOKEN_VALUE=>$matches[1],
+                        self::TOKEN_TYPE=>self::TOKEN_TYPE_BACKTICK_QUOTE
                     );
                 }
                 else {
                     return array(
-                        'token'=>$matches[1],
-                        'type'=>'quote'
+                        self::TOKEN_VALUE=>$matches[1],
+                        self::TOKEN_TYPE=>self::TOKEN_TYPE_QUOTE
                     );
                 }
             }
@@ -174,35 +191,35 @@ class SqlFormatter
         // Number
         if(preg_match('/^([0-9]+(\.[0-9]+)?)($|\s|"\'`|'.self::$regex_boundaries.')/',$string,$matches)) {
             return array(
-                'token' => $matches[1],
-                'type'=>'number'
+                self::TOKEN_VALUE => $matches[1],
+                self::TOKEN_TYPE=>self::TOKEN_TYPE_NUMBER
             );
         }
 
         // Boundary Character (punctuation and symbols)
         if(preg_match('/^('.self::$regex_boundaries.')/',$string,$matches)) {           
             return array(
-                'token' => $matches[1],
-                'type'  => 'boundary'
+                self::TOKEN_VALUE => $matches[1],
+                self::TOKEN_TYPE  => self::TOKEN_TYPE_BOUNDARY
             );
         }
 
         // A reserved word cannot be preceded by a '.'
         // this makes it so in "mytable.from", "from" is not considered a reserved word
-        if (!$previous || !isset($previous['token']) || $previous['token'] !== '.') {
+        if (!$previous || !isset($previous[self::TOKEN_VALUE]) || $previous[self::TOKEN_VALUE] !== '.') {
             $upper = strtoupper($string);
             // Special Reserved Word
             if(preg_match('/^('.self::$regex_special_reserved.')($|\s|'.self::$regex_boundaries.')/', $upper,$matches)) {
                 return array(
-                    'type'=>'special reserved',
-                    'token'=>substr($string,0,strlen($matches[1]))
+                    self::TOKEN_TYPE=>self::TOKEN_TYPE_SPECIAL_RESERVED,
+                    self::TOKEN_VALUE=>substr($string,0,strlen($matches[1]))
                 );
             }
             // Other Reserved Word
             if(preg_match('/^('.self::$regex_reserved.')($|\s|'.self::$regex_boundaries.')/', $upper,$matches)) {
                 return array(
-                    'type'=>'reserved',
-                    'token'=>substr($string,0,strlen($matches[1]))
+                    self::TOKEN_TYPE=>self::TOKEN_TYPE_RESERVED,
+                    self::TOKEN_VALUE=>substr($string,0,strlen($matches[1]))
                 );
             }
         }
@@ -211,14 +228,14 @@ class SqlFormatter
         preg_match('/^(.*?)($|\s|["\'`]|'.self::$regex_boundaries.')/',$string,$matches);
 
         return array(
-            'token' => $matches[1],
-            'type'  => 'word'
+            self::TOKEN_VALUE => $matches[1],
+            self::TOKEN_TYPE  => self::TOKEN_TYPE_WORD
         );
     }
 
     /**
      * Takes a SQL string and breaks it into tokens.
-     * Each token is an associative array with a 'token' and 'type' key.
+     * Each token is an associative array with type and value.
      *
      * @param String $string The SQL string
      *
@@ -245,8 +262,8 @@ class SqlFormatter
             // If the string stopped shrinking, there was a problem
             if ($old_string_len <= $current_length) {
                 $tokens[] = array(
-                    'token'=>$string,
-                    'type'=>'error'
+                    self::TOKEN_VALUE=>$string,
+                    self::TOKEN_TYPE=>self::TOKEN_TYPE_ERROR
                 );
                 
                 return $tokens;
@@ -265,13 +282,13 @@ class SqlFormatter
             if($cacheKey && isset(self::$token_cache[$cacheKey])) {
                 // Retrieve from cache
                 $token = self::$token_cache[$cacheKey];
-                $token_length = strlen($token['token']);
+                $token_length = strlen($token[self::TOKEN_VALUE]);
                 self::$cache_hits++;
             }
             else {
                 // Get the next token and the token type
                 $token = self::getNextToken($string, $token);               
-                $token_length = strlen($token['token']);
+                $token_length = strlen($token[self::TOKEN_VALUE]);
                 self::$cache_misses++;
                
                 // If the token is shorter than the max length, store it in cache
@@ -320,7 +337,7 @@ class SqlFormatter
         // Format token by token
         foreach ($tokens as $i=>$token) {
             // Don't process whitespace
-            if ($token['type'] === 'whitespace') {
+            if ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_WHITESPACE) {
                 continue;
             }
             
@@ -328,7 +345,7 @@ class SqlFormatter
             if ($highlight) {
                 $highlighted = self::highlightToken($token);
             } else { // If returning raw text
-                $highlighted = $token['token'];
+                $highlighted = $token[self::TOKEN_VALUE];
             }
 
             // If we are increasing the special indent level now
@@ -345,8 +362,8 @@ class SqlFormatter
             }
            
             // Display comments directly where they appear in the source
-            if ($token['type'] === 'comment' || $token['type'] === 'block comment') {
-                if ($token['type'] === 'block comment') {
+            if ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_COMMENT || $token[self::TOKEN_TYPE] === self::TOKEN_TYPE_BLOCK_COMMENT) {
+                if ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_BLOCK_COMMENT) {
                     $return .= "\n" . str_repeat($tab,$indent_level);
                 }
 
@@ -366,7 +383,7 @@ class SqlFormatter
             }
 
             // Opening parentheses increase the block indent level and start a new line
-            if ($token['token'] === '(') {
+            if ($token[self::TOKEN_VALUE] === '(') {
                 // First check if this should be an inline parentheses block
                 // Examples are "NOW()", "COUNT(*)", "int(10)", key(`somecolumn`), DECIMAL(7,2)
                 // Allow up to 3 non-whitespace tokens inside inline parentheses
@@ -378,23 +395,23 @@ class SqlFormatter
                     $next = $tokens[$i+$j];
                     
                     // Ignore whitespace
-                    if($next['type']==='whitespace') {
+                    if($next[self::TOKEN_TYPE]===self::TOKEN_TYPE_WHITESPACE) {
                         continue;
                     }
                    
                     // Reached closing parentheses
-                    if($next['token'] === ')') {
+                    if($next[self::TOKEN_VALUE] === ')') {
                         $inline_parentheses = true;
                         break;
                     }
                     
                     // Reached an invalid token for inline parentheses
-                    if ($next['token']===';' || $next['token']==='(') {
+                    if ($next[self::TOKEN_VALUE]===';' || $next[self::TOKEN_VALUE]==='(') {
                         break;
                     }
                     
                     // Reached an invalid token type for inline parentheses
-                    if ($next['type']==='special reserved' || $next['type']==='comment' || $next['type']==='block comment') {
+                    if ($next[self::TOKEN_TYPE]===self::TOKEN_TYPE_SPECIAL_RESERVED || $next[self::TOKEN_TYPE]===self::TOKEN_TYPE_COMMENT || $next[self::TOKEN_TYPE]===self::TOKEN_TYPE_BLOCK_COMMENT) {
                         break;
                     }
                     
@@ -407,7 +424,7 @@ class SqlFormatter
                 }
                
                 // Take out the preceding space unless there was whitespace there in the original query
-                if (isset($tokens[$i-1]) && $tokens[$i-1]['type'] !== 'whitespace') {
+                if (isset($tokens[$i-1]) && $tokens[$i-1][self::TOKEN_TYPE] !== self::TOKEN_TYPE_WHITESPACE) {
                     $return = rtrim($return,' ');
                 }
                
@@ -420,7 +437,7 @@ class SqlFormatter
             }
            
             // Closing parentheses decrease the block indent level
-            elseif ($token['token'] === ')') {
+            elseif ($token[self::TOKEN_VALUE] === ')') {
                 // Remove whitespace before the closing parentheses
                 $return = rtrim($return,' ');
                    
@@ -446,7 +463,7 @@ class SqlFormatter
                         $indent_level = 0;
                        
                         if ($highlight) {
-                            $return .= "\n".self::highlightError($token['token']);
+                            $return .= "\n".self::highlightError($token[self::TOKEN_VALUE]);
                             continue;
                         }
                     }
@@ -460,12 +477,12 @@ class SqlFormatter
             }
            
             // Commas start a new line (unless within inline parentheses)
-            elseif ($token['token'] === ',' && !$inline_parentheses) {
+            elseif ($token[self::TOKEN_VALUE] === ',' && !$inline_parentheses) {
                 $newline = true;
             }
            
             // Special reserved words start a new line and increase the special indent level
-            elseif ($token['type'] === 'special reserved') {
+            elseif ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_SPECIAL_RESERVED) {
                 $increase_special_indent = true;
                
                 // If the last indent type was 'special', decrease the special indent for this round
@@ -487,20 +504,20 @@ class SqlFormatter
                 }
 
                 // If the token may have extra whitespace
-                if (strpos($token['token'],' ')!==false || strpos($token['token'],"\n")!==false || strpos($token['token'],"\t")!==false) {
+                if (strpos($token[self::TOKEN_VALUE],' ')!==false || strpos($token[self::TOKEN_VALUE],"\n")!==false || strpos($token[self::TOKEN_VALUE],"\t")!==false) {
                     $highlighted = preg_replace('/\s+/',' ',$highlighted);
                 }
             }
 
             // If the token shouldn't have a space before it
-            if ($token['token'] === '.' || $token['token'] === ',' || $token['token'] === ';') {
+            if ($token[self::TOKEN_VALUE] === '.' || $token[self::TOKEN_VALUE] === ',' || $token[self::TOKEN_VALUE] === ';') {
                 $return = rtrim($return, ' ');
             }
            
             $return .= $highlighted.' ';
 
             // If the token shouldn't have a space after it
-            if ($token['token'] === '(' || $token['token'] === '.') {
+            if ($token[self::TOKEN_VALUE] === '(' || $token[self::TOKEN_VALUE] === '.') {
                 $return = rtrim($return,' ');
             }
         }
@@ -558,7 +575,7 @@ class SqlFormatter
         
         foreach ($tokens as $token) {            
             // If this is a query separator
-            if ($token['token'] === ';') {
+            if ($token[self::TOKEN_VALUE] === ';') {
                 if (!$empty) {
                     $queries[] = $current_query.';';
                 }
@@ -568,11 +585,11 @@ class SqlFormatter
             }
             
             // If this is a non-empty character
-            if($token['type'] !== 'whitespace' && $token['type'] !== 'comment' && $token['type'] !== 'block comment') {
+            if($token[self::TOKEN_TYPE] !== self::TOKEN_TYPE_WHITESPACE && $token[self::TOKEN_TYPE] !== self::TOKEN_TYPE_COMMENT && $token[self::TOKEN_TYPE] !== self::TOKEN_TYPE_BLOCK_COMMENT) {
                 $empty = false;
             }
 
-            $current_query .= $token['token'];
+            $current_query .= $token[self::TOKEN_VALUE];
         }
 
         if (!$empty) {
@@ -597,11 +614,11 @@ class SqlFormatter
 
         foreach ($tokens as $token) {
             // Skip comment tokens
-            if ($token['type'] === 'comment' || $token['type'] === 'block comment') {
+            if ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_COMMENT || $token[self::TOKEN_TYPE] === self::TOKEN_TYPE_BLOCK_COMMENT) {
                 continue;
             }
 
-            $result .= $token['token'];
+            $result .= $token[self::TOKEN_VALUE];
         }
 
         return $result;
@@ -610,37 +627,37 @@ class SqlFormatter
     /**
      * Highlights a token depending on its type.
      *
-     * @param Array $token An associative array containing 'token' and 'type' keys.
+     * @param Array $token An associative array containing type and value.
      *
      * @return String HTML code of the highlighted token.
      */
     protected static function highlightToken($token)
     {
-        $type = $token['type'];
-        $token = htmlentities($token['token']);
+        $type = $token[self::TOKEN_TYPE];
+        $token = htmlentities($token[self::TOKEN_VALUE]);
 
-        if($type==='boundary') {
+        if($type===self::TOKEN_TYPE_BOUNDARY) {
             return self::highlightBoundary($token);
         }
-        elseif($type==='word') {
+        elseif($type===self::TOKEN_TYPE_WORD) {
             return self::highlightWord($token);
         }
-        elseif($type==='backtick quote') {
+        elseif($type===self::TOKEN_TYPE_BACKTICK_QUOTE) {
             return self::highlightBacktickQuote($token);
         }
-        elseif($type==='quote') {
+        elseif($type===self::TOKEN_TYPE_QUOTE) {
             return self::highlightQuote($token);
         }
-        elseif($type==='reserved') {
+        elseif($type===self::TOKEN_TYPE_RESERVED) {
             return self::highlightReservedWord($token);
         }
-        elseif($type==='special reserved') {
+        elseif($type===self::TOKEN_TYPE_SPECIAL_RESERVED) {
             return self::highlightReservedWord($token);
         }
-        elseif($type==='number') {
+        elseif($type===self::TOKEN_TYPE_NUMBER) {
             return self::highlightNumber($token);
         }
-        elseif($type==='comment' || $type==='block comment') {
+        elseif($type===self::TOKEN_TYPE_COMMENT || $type===self::TOKEN_TYPE_BLOCK_COMMENT) {
             return self::highlightComment($token);
         }
         
