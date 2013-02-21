@@ -313,10 +313,11 @@ class SqlFormatter
      *
      * @param String  $string    The SQL string
      * @param boolean $highlight If true, syntax highlighting will also be performed
+     * @param boolean $preformatted If true, enclose string in <pre> tags
      *
      * @return String The SQL string with HTML styles and formatting wrapped in a <pre> tag
      */
-    public static function format($string, $highlight=true,$preformatted=true) {
+    public static function format($string, $highlight=true, $preformatted=true) {
         // This variable will be populated with formatted html
         $return = '';
 
@@ -541,6 +542,7 @@ class SqlFormatter
      * Add syntax highlighting to a SQL string
      *
      * @param String $string The SQL string
+     * @param boolean $preformatted If true, enclose string in <pre> tags
      *
      * @return String The SQL string with HTML styles applied
      */
@@ -785,14 +787,20 @@ class SqlFormatter
         return preg_quote($a,'/');
     }
     
+    /**
+     * Helper function for building string output
+     *
+     * @param String $a The string to be quoted
+     * @param boolean $preformatted If true, enclose string in <pre> tags
+     *
+     * @return String The quoted string
+     */
     private static function output($string,$preformatted=true){
         $string=trim($string);
-        if($preformatted){
-            return '<pre '.self::$pre_attributes.'>' . $string . '</pre>';
-        }
-        else {
+        if(!$preformatted){
             return $string;
+            
         }
-        
+        return '<pre '.self::$pre_attributes.'>' . $string . '</pre>';
     }
 }
