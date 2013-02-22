@@ -172,7 +172,7 @@ class SqlFormatter
             // 1. backtick quoted string using `` to escape
             // 2. double quoted string using "" or \" to escape
             // 3. single quoted string using '' or \' to escape
-            if( preg_match('/^((`(?:[^`]|``)*($|`))|("((?:[^"\\\\]|"")|(?:[^"\\\\]|\\\\.))*($|"))|(\'((?:[^\'\\\\]|\'\')|(?:[^\'\\\\]|\\\\.))*($|\')))/', $string, $matches)) {
+            if( preg_match('/^(((`[^`]*($|`))+)|(("[^"\\\\]*(?:\\\\.[^"\\\\]*)*("|$))+)|((\'[^\'\\\\]*(?:\\\\.[^\'\\\\]*)*(\'|$))+))/s', $string, $matches)) {
                 if($string[0]==='`') {
                     return array(
                         self::TOKEN_VALUE=>$matches[1],
