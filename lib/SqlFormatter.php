@@ -81,6 +81,9 @@ class SqlFormatter
     // The tab character to use when formatting SQL
     public static $tab = '  ';
 
+    // This flag tells us if queries need to be embedded in <pre> tags
+    public static $use_pre = true;
+    
     // This flag tells us if SqlFormatted has been initialized
     protected static $init;
    
@@ -313,11 +316,10 @@ class SqlFormatter
      *
      * @param String  $string    The SQL string
      * @param boolean $highlight If true, syntax highlighting will also be performed
-     * @param boolean $preformatted If true, enclose string in <pre> tags
      *
      * @return String The SQL string with HTML styles and formatting wrapped in a <pre> tag
      */
-        public static function format($string, $highlight=true, $preformatted=true) {
+	public static function format($string, $highlight=true) {
         // This variable will be populated with formatted html
         $return = '';
 
@@ -532,7 +534,7 @@ class SqlFormatter
         $return = trim(str_replace("\t",self::$tab,$return));
 
         if ($highlight) {
-            $return = self::output($return,$preformatted);
+            $return = self::output($return);
         }
 
         return $return;       
@@ -542,11 +544,10 @@ class SqlFormatter
      * Add syntax highlighting to a SQL string
      *
      * @param String $string The SQL string
-     * @param boolean $preformatted If true, enclose string in <pre> tags
      *
      * @return String The SQL string with HTML styles applied
      */
-    public static function highlight($string,$preformatted=true)
+    public static function highlight($string)
     {
         $tokens = self::tokenize($string);
 
@@ -556,7 +557,7 @@ class SqlFormatter
             $return .= self::highlightToken($token);
         }
 
-        return self::output($return,$preformatted);
+        return self::output($return);
     }
 
     /**
@@ -783,7 +784,8 @@ class SqlFormatter
      *
      * @return String The quoted string
      */
-    private static function quote_regex($a) {
+    private static function quote_regex($a)
+    {
         return preg_quote($a,'/');
     }
     
@@ -791,16 +793,15 @@ class SqlFormatter
      * Helper function for building string output
      *
      * @param String $a The string to be quoted
-     * @param boolean $preformatted If true, enclose string in <pre> tags
      *
      * @return String The quoted string
      */
-    private static function output($string,$preformatted=true){
+    private static function output($string)
+    {
     	$string=trim($string);
-    	if(!$preformatted){
+    	if(!static::$use_pre){
     		return $string;
-    
     	}
-    	return '<pre '.self::$pre_attributes.'>' . $string . '</pre>';
+    	return '<pre '.static::$pre_attributes.'>' . $string . '</pre>';
     }
 }
