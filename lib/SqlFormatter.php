@@ -81,7 +81,7 @@ class SqlFormatter
     // The tab character to use when formatting SQL
     public static $tab = '  ';
 
-    // This flag tells us if queries need to be embedded in <pre> tags
+    // This flag tells us if queries need to be enclosed in <pre> tags
     public static $use_pre = true;
     
     // This flag tells us if SqlFormatted has been initialized
@@ -319,7 +319,7 @@ class SqlFormatter
      *
      * @return String The SQL string with HTML styles and formatting wrapped in a <pre> tag
      */
-	public static function format($string, $highlight=true) {
+    public static function format($string, $highlight=true) {
         // This variable will be populated with formatted html
         $return = '';
 
@@ -792,7 +792,7 @@ class SqlFormatter
     /**
      * Helper function for building string output
      *
-     * @param String $a The string to be quoted
+     * @param String $string The string to be quoted
      *
      * @return String The quoted string
      */
