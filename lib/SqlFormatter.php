@@ -313,10 +313,11 @@ class SqlFormatter
      *
      * @param String  $string    The SQL string
      * @param boolean $highlight If true, syntax highlighting will also be performed
+     * @param boolean $preformatted If true, enclose string in <pre> tags
      *
      * @return String The SQL string with HTML styles and formatting wrapped in a <pre> tag
      */
-    public static function format($string, $highlight=true) {
+    public static function format($string, $highlight=true, $preformatted=true) {
         // This variable will be populated with formatted html
         $return = '';
 
@@ -531,7 +532,7 @@ class SqlFormatter
         $return = trim(str_replace("\t",self::$tab,$return));
 
         if ($highlight) {
-            $return = "<pre ".self::$pre_attributes.">" . $return . "</pre>";
+            $return = self::output($return,$preformatted);
         }
 
         return $return;       
@@ -541,10 +542,11 @@ class SqlFormatter
      * Add syntax highlighting to a SQL string
      *
      * @param String $string The SQL string
+     * @param boolean $preformatted If true, enclose string in <pre> tags
      *
      * @return String The SQL string with HTML styles applied
      */
-    public static function highlight($string)
+    public static function highlight($string,$preformatted=true)
     {
         $tokens = self::tokenize($string);
 
@@ -554,7 +556,7 @@ class SqlFormatter
             $return .= self::highlightToken($token);
         }
 
-        return "<pre ".self::$pre_attributes.">" . trim($return) . "</pre>";
+        return self::output($return,$preformatted);
     }
 
     /**
@@ -783,5 +785,22 @@ class SqlFormatter
      */
     private static function quote_regex($a) {
         return preg_quote($a,'/');
+    }
+    
+    /**
+     * Helper function for building string output
+     *
+     * @param String $a The string to be quoted
+     * @param boolean $preformatted If true, enclose string in <pre> tags
+     *
+     * @return String The quoted string
+     */
+    private static function output($string,$preformatted=true){
+        $string=trim($string);
+        if(!$preformatted){
+            return $string;
+            
+        }
+        return '<pre '.self::$pre_attributes.'>' . $string . '</pre>';
     }
 }
