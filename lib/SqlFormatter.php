@@ -799,9 +799,9 @@ class SqlFormatter
     private static function output($string)
     {
     	$string=trim($string);
-    	if(!static::$use_pre){
-    		return $string;
+    	if(!self::$use_pre){
+    	    return $string;
     	}
-    	return '<pre '.static::$pre_attributes.'>' . $string . '</pre>';
+    	return '<pre '.self::$pre_attributes.'>' . $string . '</pre>';
     }
 }
