@@ -9,6 +9,9 @@
     "require": {
         "php": ">=5.2.4"
     },
+    "require-dev": {
+        "phpunit/phpunit": "3.7.*"
+    },
     "authors": [
         {
             "name": "Jeremy Dorn",
