@@ -81,6 +81,9 @@ class SqlFormatter
     // The tab character to use when formatting SQL
     public static $tab = '  ';
 
+    // This flag tells us if queries need to be enclosed in <pre> tags
+    public static $use_pre = true;
+    
     // This flag tells us if SqlFormatted has been initialized
     protected static $init;
    
@@ -531,7 +534,7 @@ class SqlFormatter
         $return = trim(str_replace("\t",self::$tab,$return));
 
         if ($highlight) {
-            $return = "<pre ".self::$pre_attributes.">" . $return . "</pre>";
+            $return = self::output($return);
         }
 
         return $return;       
@@ -554,7 +557,7 @@ class SqlFormatter
             $return .= self::highlightToken($token);
         }
 
-        return "<pre ".self::$pre_attributes.">" . trim($return) . "</pre>";
+        return self::output($return);
     }
 
     /**
@@ -781,7 +784,24 @@ class SqlFormatter
      *
      * @return String The quoted string
      */
-    private static function quote_regex($a) {
+    private static function quote_regex($a)
+    {
         return preg_quote($a,'/');
+    }
+    
+    /**
+     * Helper function for building string output
+     *
+     * @param String $string The string to be quoted
+     *
+     * @return String The quoted string
+     */
+    private static function output($string)
+    {
+    	$string=trim($string);
+    	if(!self::$use_pre){
+    	    return $string;
+    	}
+    	return '<pre '.self::$pre_attributes.'>' . $string . '</pre>';
     }
 }
