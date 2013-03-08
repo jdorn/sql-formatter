@@ -637,7 +637,7 @@ class SqlFormatter
     protected static function highlightToken($token)
     {
         $type = $token[self::TOKEN_TYPE];
-        $token = htmlentities($token[self::TOKEN_VALUE]);
+        $token = htmlentities($token[self::TOKEN_VALUE],ENT_COMPAT,'UTF-8');
 
         if($type===self::TOKEN_TYPE_BOUNDARY) {
             return self::highlightBoundary($token);
