@@ -23,6 +23,18 @@ class SqlFormatterTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(trim($html), trim(SqlFormatter::highlight($sql)));
 	}
 	
+	function testUsePre() {
+		SqlFormatter::$use_pre = false;
+		$actual = SqlFormatter::highlight("test");
+		$expected = '<span style="color: #333;">test</span>';
+		$this->assertEquals($actual,$expected);
+		
+		SqlFormatter::$use_pre = true;
+		$actual = SqlFormatter::highlight("test");
+		$expected = '<pre style="color: black; background-color: white;"><span style="color: #333;">test</span></pre>';
+		$this->assertEquals($actual,$expected);
+	}
+	
 	function testSplitQuery() {
 		$expected = array(
 			"SELECT 'test' FROM MyTable;",

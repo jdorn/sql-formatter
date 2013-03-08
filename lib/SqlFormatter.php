@@ -171,24 +171,20 @@ class SqlFormatter
 
         // Quoted String
         if($string[0]==='"' || $string[0]==='\'' || $string[0]==='`') {
+            $return = array(
+                self::TOKEN_TYPE => ($string[0]==='`'? self::TOKEN_TYPE_BACKTICK_QUOTE : self::TOKEN_TYPE_QUOTE),
+                self::TOKEN_VALUE => $string
+            );
+            
             // This checks for the following patterns:
             // 1. backtick quoted string using `` to escape
             // 2. double quoted string using "" or \" to escape
             // 3. single quoted string using '' or \' to escape
             if( preg_match('/^(((`[^`]*($|`))+)|(("[^"\\\\]*(?:\\\\.[^"\\\\]*)*("|$))+)|((\'[^\'\\\\]*(?:\\\\.[^\'\\\\]*)*(\'|$))+))/s', $string, $matches)) {
-                if($string[0]==='`') {
-                    return array(
-                        self::TOKEN_VALUE=>$matches[1],
-                        self::TOKEN_TYPE=>self::TOKEN_TYPE_BACKTICK_QUOTE
-                    );
-                }
-                else {
-                    return array(
-                        self::TOKEN_VALUE=>$matches[1],
-                        self::TOKEN_TYPE=>self::TOKEN_TYPE_QUOTE
-                    );
-                }
+                $return[self::TOKEN_VALUE] = $matches[1];
             }
+            
+            return $return;
         }
        
         // Number
@@ -511,6 +507,13 @@ class SqlFormatter
                     $highlighted = preg_replace('/\s+/',' ',$highlighted);
                 }
             }
+            
+            // Multiple boundary characters in a row should not have spaces between them (not including parentheses)
+            elseif($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_BOUNDARY) {
+                if($tokens[$i-1][self::TOKEN_TYPE] === self::TOKEN_TYPE_BOUNDARY) {
+                    $return = rtrim($return, ' ');
+                }
+            }
 
             // If the token shouldn't have a space before it
             if ($token[self::TOKEN_VALUE] === '.' || $token[self::TOKEN_VALUE] === ',' || $token[self::TOKEN_VALUE] === ';') {
@@ -799,7 +802,7 @@ class SqlFormatter
     private static function output($string)
     {
     	$string=trim($string);
-    	if(!self::$use_pre){
+    	if(!self::$use_pre) {
     	    return $string;
     	}
     	return '<pre '.self::$pre_attributes.'>' . $string . '</pre>';

@@ -238,8 +238,8 @@ MyTable # One final comment
 /* This is a block comment 
 */ WHERE 1 = 2;
 
+SELECT -- This is a test
+
 SELECT Test FROM Test WHERE
 (
  MyColumn = 1 )) AND ((( SomeOtherColumn = 2);
-
-SELECT -- This is a test
