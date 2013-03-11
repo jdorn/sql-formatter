@@ -4,8 +4,7 @@
   <span style="font-weight:bold;">COUNT</span>(<span style="color: #333;">order_id</span>) <span style="font-weight:bold;">as</span> <span style="color: #333;">total</span> 
 <span style="font-weight:bold;">FROM</span> 
   <span style="color: #333;">customers</span> 
-<span style="font-weight:bold;">INNER JOIN</span> 
-  <span style="color: #333;">orders</span> <span style="font-weight:bold;">ON</span> <span style="color: #333;">customers</span><span >.</span><span style="color: #333;">customer_id</span> <span >=</span> <span style="color: #333;">orders</span><span >.</span><span style="color: #333;">customer_id</span> 
+  <span style="font-weight:bold;">INNER JOIN</span> <span style="color: #333;">orders</span> <span style="font-weight:bold;">ON</span> <span style="color: #333;">customers</span><span >.</span><span style="color: #333;">customer_id</span> <span >=</span> <span style="color: #333;">orders</span><span >.</span><span style="color: #333;">customer_id</span> 
 <span style="font-weight:bold;">GROUP BY</span> 
   <span style="color: #333;">customer_id</span><span >,</span> 
   <span style="color: #333;">customer_name</span> 
@@ -158,259 +157,296 @@
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'displayPayment'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_module`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'cheque'</span>
-  ) <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_hook</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'displayPaymentReturn'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_module`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'cheque'</span>
-  ) <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_hook</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'displayHome'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_module`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'homeslider'</span>
-  ) <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_hook</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'actionAuthentication'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_module`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'statsdata'</span>
-  ) <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_hook</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'actionShopDataDuplication'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_module`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'homeslider'</span>
-  ) <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_hook</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'displayTop'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_module`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'blocklanguages'</span>
-  ) <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_hook</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'actionCustomerAccountAdd'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_module`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'statsdata'</span>
-  ) <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_hook</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'displayCustomerAccount'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_module`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'favoriteproducts'</span>
-  ) <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_hook</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'displayAdminStatsModules'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_module`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'statsvisits'</span>
-  ) <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_hook</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'displayAdminStatsGraphEngine'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_module`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'graphvisifire'</span>
-  ) <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_hook</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'displayAdminStatsGridEngine'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_module`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'gridhtml'</span>
-  ) <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_hook</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'displayLeftColumnProduct'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_module`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'blocksharefb'</span>
-  ) <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_hook</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'actionSearch'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_module`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'statssearch'</span>
-  ) <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_hook</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'actionCategoryAdd'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_module`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'blockcategories'</span>
-  ) <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_hook</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'actionCategoryUpdate'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_module`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'blockcategories'</span>
-  ) <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_hook</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'actionCategoryDelete'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_module`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'blockcategories'</span>
-  ) <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_hook</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'actionAdminMetaSave'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_module`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'blockcategories'</span>
-  ) <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_hook</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'displayMyAccountBlock'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_module`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'favoriteproducts'</span>
-  ) <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">OR</span> <span style="color: #333;">id_hook</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_hook</span> 
     <span style="font-weight:bold;">FROM</span> 
       <span style="color: purple;">`PREFIX_hook`</span> 
     <span style="font-weight:bold;">WHERE</span> 
       <span style="color: #333;">name</span> <span >=</span> <span style="color: blue;">'displayFooter'</span>
-  ) <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
+  ) 
+  <span style="font-weight:bold;">AND</span> <span style="color: #333;">id_module</span> <span >=</span> (
     <span style="font-weight:bold;">SELECT</span> 
       <span style="color: #333;">id_module</span> 
     <span style="font-weight:bold;">FROM</span> 
@@ -507,13 +543,13 @@
     <span style="color: blue;">'0000-00-00 00:00:00'</span> 
   <span style="font-weight:bold;">FROM</span> 
     <span style="color: purple;">`PREFIX_discount_quantity`</span> <span style="color: #333;">dq</span> 
-  <span style="font-weight:bold;">INNER JOIN</span> 
-    <span style="color: purple;">`PREFIX_product`</span> <span style="color: #333;">p</span> <span style="font-weight:bold;">ON</span> (
+    <span style="font-weight:bold;">INNER JOIN</span> <span style="color: purple;">`PREFIX_product`</span> <span style="color: #333;">p</span> <span style="font-weight:bold;">ON</span> (
       <span style="color: #333;">p</span><span >.</span><span style="color: purple;">`id_product`</span> <span >=</span> <span style="color: #333;">dq</span><span >.</span><span style="color: purple;">`id_product`</span>
     )
 )</pre>
 
-<pre style="color: black; background-color: white;"><span style="font-weight:bold;">DROP</span> <span style="font-weight:bold;">TABLE</span> <span style="color: purple;">`PREFIX_discount_quantity`</span></pre>
+<pre style="color: black; background-color: white;"><span style="font-weight:bold;">DROP</span> 
+  <span style="font-weight:bold;">TABLE</span> <span style="color: purple;">`PREFIX_discount_quantity`</span></pre>
 
 <pre style="color: black; background-color: white;"><span style="font-weight:bold;">INSERT</span> <span style="font-weight:bold;">INTO</span> <span style="color: purple;">`PREFIX_specific_price`</span> (
   <span style="color: purple;">`id_product`</span><span >,</span> 
@@ -561,14 +597,20 @@
   <span style="font-weight:bold;">FROM</span> 
     <span style="color: purple;">`PREFIX_product`</span> <span style="color: #333;">p</span> 
   <span style="font-weight:bold;">WHERE</span> 
-    <span style="color: #333;">p</span><span >.</span><span style="color: purple;">`reduction_price`</span> <span style="font-weight:bold;">OR</span> <span style="color: #333;">p</span><span >.</span><span style="color: purple;">`reduction_percent`</span>
+    <span style="color: #333;">p</span><span >.</span><span style="color: purple;">`reduction_price`</span> 
+    <span style="font-weight:bold;">OR</span> <span style="color: #333;">p</span><span >.</span><span style="color: purple;">`reduction_percent`</span>
 )</pre>
 
 <pre style="color: black; background-color: white;"><span style="font-weight:bold;">ALTER TABLE</span> 
-  <span style="color: purple;">`PREFIX_product`</span> <span style="font-weight:bold;">DROP</span> <span style="color: purple;">`reduction_price`</span><span >,</span> 
-  <span style="font-weight:bold;">DROP</span> <span style="color: purple;">`reduction_percent`</span><span >,</span> 
-  <span style="font-weight:bold;">DROP</span> <span style="color: purple;">`reduction_from`</span><span >,</span> 
-  <span style="font-weight:bold;">DROP</span> <span style="color: purple;">`reduction_to`</span></pre>
+  <span style="color: purple;">`PREFIX_product`</span> 
+<span style="font-weight:bold;">DROP</span> 
+  <span style="color: purple;">`reduction_price`</span><span >,</span> 
+<span style="font-weight:bold;">DROP</span> 
+  <span style="color: purple;">`reduction_percent`</span><span >,</span> 
+<span style="font-weight:bold;">DROP</span> 
+  <span style="color: purple;">`reduction_from`</span><span >,</span> 
+<span style="font-weight:bold;">DROP</span> 
+  <span style="color: purple;">`reduction_to`</span></pre>
 
 <pre style="color: black; background-color: white;"><span style="font-weight:bold;">INSERT</span> <span style="font-weight:bold;">INTO</span> <span style="color: purple;">`PREFIX_configuration`</span> (
   <span style="color: purple;">`name`</span><span >,</span> 
@@ -788,7 +830,8 @@
 
 <pre style="color: black; background-color: white;"><span style="font-weight:bold;">UNLOCK</span> <span style="font-weight:bold;">TABLES</span></pre>
 
-<pre style="color: black; background-color: white;"><span style="font-weight:bold;">DROP</span> <span style="font-weight:bold;">TABLE</span> <span style="font-weight:bold;">IF</span> <span style="font-weight:bold;">EXISTS</span> <span style="color: purple;">`admin_role`</span></pre>
+<pre style="color: black; background-color: white;"><span style="font-weight:bold;">DROP</span> 
+  <span style="font-weight:bold;">TABLE</span> <span style="font-weight:bold;">IF</span> <span style="font-weight:bold;">EXISTS</span> <span style="color: purple;">`admin_role`</span></pre>
 
 <pre style="color: black; background-color: white;"><span style="font-weight:bold;">SELECT</span> 
   <span >*</span> 
@@ -807,7 +850,8 @@
   <span style="color: #333;">Test</span> 
 <span style="font-weight:bold;">WHERE</span> 
   (<span style="color: #333;">MyColumn</span> <span >=</span> <span style="color: green;">1</span>)
-<span style="background-color: red;">)</span><span style="font-weight:bold;">AND</span> (
+<span style="background-color: red;">)</span>
+<span style="font-weight:bold;">AND</span> (
   (
     (<span style="color: #333;">SomeOtherColumn</span> <span >=</span> <span style="color: green;">2</span>)<span >;</span> 
 <span style="background-color: red;">WARNING: unclosed parentheses or section</span></pre>

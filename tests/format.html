@@ -4,8 +4,7 @@ SELECT
   COUNT(order_id) as total 
 FROM 
   customers 
-INNER JOIN 
-  orders ON customers.customer_id = orders.customer_id 
+  INNER JOIN orders ON customers.customer_id = orders.customer_id 
 GROUP BY 
   customer_id, 
   customer_name 
@@ -158,259 +157,296 @@ WHERE
       `PREFIX_hook` 
     WHERE 
       name = 'displayPayment'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
       `PREFIX_module` 
     WHERE 
       name = 'cheque'
-  ) OR id_hook = (
+  ) 
+  OR id_hook = (
     SELECT 
       id_hook 
     FROM 
       `PREFIX_hook` 
     WHERE 
       name = 'displayPaymentReturn'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
       `PREFIX_module` 
     WHERE 
       name = 'cheque'
-  ) OR id_hook = (
+  ) 
+  OR id_hook = (
     SELECT 
       id_hook 
     FROM 
       `PREFIX_hook` 
     WHERE 
       name = 'displayHome'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
       `PREFIX_module` 
     WHERE 
       name = 'homeslider'
-  ) OR id_hook = (
+  ) 
+  OR id_hook = (
     SELECT 
       id_hook 
     FROM 
       `PREFIX_hook` 
     WHERE 
       name = 'actionAuthentication'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
       `PREFIX_module` 
     WHERE 
       name = 'statsdata'
-  ) OR id_hook = (
+  ) 
+  OR id_hook = (
     SELECT 
       id_hook 
     FROM 
       `PREFIX_hook` 
     WHERE 
       name = 'actionShopDataDuplication'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
       `PREFIX_module` 
     WHERE 
       name = 'homeslider'
-  ) OR id_hook = (
+  ) 
+  OR id_hook = (
     SELECT 
       id_hook 
     FROM 
       `PREFIX_hook` 
     WHERE 
       name = 'displayTop'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
       `PREFIX_module` 
     WHERE 
       name = 'blocklanguages'
-  ) OR id_hook = (
+  ) 
+  OR id_hook = (
     SELECT 
       id_hook 
     FROM 
       `PREFIX_hook` 
     WHERE 
       name = 'actionCustomerAccountAdd'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
       `PREFIX_module` 
     WHERE 
       name = 'statsdata'
-  ) OR id_hook = (
+  ) 
+  OR id_hook = (
     SELECT 
       id_hook 
     FROM 
       `PREFIX_hook` 
     WHERE 
       name = 'displayCustomerAccount'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
       `PREFIX_module` 
     WHERE 
       name = 'favoriteproducts'
-  ) OR id_hook = (
+  ) 
+  OR id_hook = (
     SELECT 
       id_hook 
     FROM 
       `PREFIX_hook` 
     WHERE 
       name = 'displayAdminStatsModules'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
       `PREFIX_module` 
     WHERE 
       name = 'statsvisits'
-  ) OR id_hook = (
+  ) 
+  OR id_hook = (
     SELECT 
       id_hook 
     FROM 
       `PREFIX_hook` 
     WHERE 
       name = 'displayAdminStatsGraphEngine'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
       `PREFIX_module` 
     WHERE 
       name = 'graphvisifire'
-  ) OR id_hook = (
+  ) 
+  OR id_hook = (
     SELECT 
       id_hook 
     FROM 
       `PREFIX_hook` 
     WHERE 
       name = 'displayAdminStatsGridEngine'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
       `PREFIX_module` 
     WHERE 
       name = 'gridhtml'
-  ) OR id_hook = (
+  ) 
+  OR id_hook = (
     SELECT 
       id_hook 
     FROM 
       `PREFIX_hook` 
     WHERE 
       name = 'displayLeftColumnProduct'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
       `PREFIX_module` 
     WHERE 
       name = 'blocksharefb'
-  ) OR id_hook = (
+  ) 
+  OR id_hook = (
     SELECT 
       id_hook 
     FROM 
       `PREFIX_hook` 
     WHERE 
       name = 'actionSearch'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
       `PREFIX_module` 
     WHERE 
       name = 'statssearch'
-  ) OR id_hook = (
+  ) 
+  OR id_hook = (
     SELECT 
       id_hook 
     FROM 
       `PREFIX_hook` 
     WHERE 
       name = 'actionCategoryAdd'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
       `PREFIX_module` 
     WHERE 
       name = 'blockcategories'
-  ) OR id_hook = (
+  ) 
+  OR id_hook = (
     SELECT 
       id_hook 
     FROM 
       `PREFIX_hook` 
     WHERE 
       name = 'actionCategoryUpdate'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
       `PREFIX_module` 
     WHERE 
       name = 'blockcategories'
-  ) OR id_hook = (
+  ) 
+  OR id_hook = (
     SELECT 
       id_hook 
     FROM 
       `PREFIX_hook` 
     WHERE 
       name = 'actionCategoryDelete'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
       `PREFIX_module` 
     WHERE 
       name = 'blockcategories'
-  ) OR id_hook = (
+  ) 
+  OR id_hook = (
     SELECT 
       id_hook 
     FROM 
       `PREFIX_hook` 
     WHERE 
       name = 'actionAdminMetaSave'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
       `PREFIX_module` 
     WHERE 
       name = 'blockcategories'
-  ) OR id_hook = (
+  ) 
+  OR id_hook = (
     SELECT 
       id_hook 
     FROM 
       `PREFIX_hook` 
     WHERE 
       name = 'displayMyAccountBlock'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
       `PREFIX_module` 
     WHERE 
       name = 'favoriteproducts'
-  ) OR id_hook = (
+  ) 
+  OR id_hook = (
     SELECT 
       id_hook 
     FROM 
       `PREFIX_hook` 
     WHERE 
       name = 'displayFooter'
-  ) AND id_module = (
+  ) 
+  AND id_module = (
     SELECT 
       id_module 
     FROM 
@@ -507,13 +543,13 @@ INSERT INTO `PREFIX_specific_price` (
     '0000-00-00 00:00:00' 
   FROM 
     `PREFIX_discount_quantity` dq 
-  INNER JOIN 
-    `PREFIX_product` p ON (
+    INNER JOIN `PREFIX_product` p ON (
       p.`id_product` = dq.`id_product`
     )
 )
 
-DROP TABLE `PREFIX_discount_quantity`
+DROP 
+  TABLE `PREFIX_discount_quantity`
 
 INSERT INTO `PREFIX_specific_price` (
   `id_product`, 
@@ -561,14 +597,20 @@ INSERT INTO `PREFIX_specific_price` (
   FROM 
     `PREFIX_product` p 
   WHERE 
-    p.`reduction_price` OR p.`reduction_percent`
+    p.`reduction_price` 
+    OR p.`reduction_percent`
 )
 
 ALTER TABLE 
-  `PREFIX_product` DROP `reduction_price`, 
-  DROP `reduction_percent`, 
-  DROP `reduction_from`, 
-  DROP `reduction_to`
+  `PREFIX_product` 
+DROP 
+  `reduction_price`, 
+DROP 
+  `reduction_percent`, 
+DROP 
+  `reduction_from`, 
+DROP 
+  `reduction_to`
 
 INSERT INTO `PREFIX_configuration` (
   `name`, 
@@ -788,7 +830,8 @@ LOCK TABLES `admin_assert` WRITE
 
 UNLOCK TABLES
 
-DROP TABLE IF EXISTS `admin_role`
+DROP 
+  TABLE IF EXISTS `admin_role`
 
 SELECT 
   * 
@@ -807,6 +850,7 @@ FROM
   Test 
 WHERE 
   (MyColumn = 1)
-) AND (
+) 
+AND (
   (
     (SomeOtherColumn = 2);
