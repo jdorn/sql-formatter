@@ -490,12 +490,15 @@ class SqlFormatter
                     $indent_level--;
                     array_shift($indent_types);
                 }
+                
+                // Indent and inline JOIN clauses as regular FROM tables
+                $is_join = (strpos($token[self::TOKEN_VALUE], 'JOIN') !== false);
                
                 // Add a newline after the special reserved word
-                $newline = true;
+                $newline = !$is_join;
                 // Add a newline before the special reserved word (if not already added)
                 if(!$added_newline) {
-                    $return .= "\n" . str_repeat($tab, $indent_level);
+                    $return .= "\n" . str_repeat($tab, $indent_level + $is_join ? 1 : 0);
                 }
                 // If we already added a newline, redo the indentation since it may be different now
                 else {
