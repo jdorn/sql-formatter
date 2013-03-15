@@ -19,12 +19,13 @@ class SqlFormatter
     const TOKEN_TYPE_QUOTE = 2;
     const TOKEN_TYPE_BACKTICK_QUOTE = 3;
     const TOKEN_TYPE_RESERVED = 4;
-    const TOKEN_TYPE_SPECIAL_RESERVED = 5;
-    const TOKEN_TYPE_BOUNDARY = 6;
-    const TOKEN_TYPE_COMMENT = 7;
-    const TOKEN_TYPE_BLOCK_COMMENT = 8;
-    const TOKEN_TYPE_NUMBER = 9;
-    const TOKEN_TYPE_ERROR = 10;
+    const TOKEN_TYPE_RESERVED_TOPLEVEL = 5;
+    const TOKEN_TYPE_RESERVED_NEWLINE = 6;
+    const TOKEN_TYPE_BOUNDARY = 7;
+    const TOKEN_TYPE_COMMENT = 8;
+    const TOKEN_TYPE_BLOCK_COMMENT = 9;
+    const TOKEN_TYPE_NUMBER = 10;
+    const TOKEN_TYPE_ERROR = 11;
     
     // Constants for different components of a token
     const TOKEN_TYPE = 0;
@@ -32,35 +33,39 @@ class SqlFormatter
     
     // Reserved words (for syntax highlighting)
     protected static $reserved = array(
-        'ACCESSIBLE', 'ACTION', 'AGAINST', 'AGGREGATE', 'ALGORITHM', 'ALL', 'ALTER', 'ANALYSE', 'ANALYZE', 'AND', 'AS', 'ASC',
+        'ACCESSIBLE', 'ACTION', 'AGAINST', 'AGGREGATE', 'ALGORITHM', 'ALL', 'ALTER', 'ANALYSE', 'ANALYZE', 'AS', 'ASC',
         'AUTOCOMMIT', 'AUTO_INCREMENT', 'BACKUP', 'BEGIN', 'BETWEEN', 'BINLOG', 'BOTH', 'CASCADE', 'CASE', 'CHANGE', 'CHANGED',
         'CHARSET', 'CHECK', 'CHECKSUM', 'COLLATE', 'COLLATION', 'COLUMN', 'COLUMNS', 'COMMENT', 'COMMIT', 'COMMITTED', 'COMPRESSED', 'CONCURRENT',
         'CONSTRAINT', 'CONTAINS', 'CONVERT', 'COUNT', 'CREATE', 'CROSS', 'CURRENT_TIMESTAMP', 'DATABASE', 'DATABASES', 'DAY', 'DAY_HOUR', 'DAY_MINUTE',
         'DAY_SECOND', 'DEFAULT', 'DEFINER', 'DELAYED', 'DELETE', 'DESC', 'DESCRIBE', 'DETERMINISTIC', 'DISTINCT', 'DISTINCTROW', 'DIV',
-        'DO', 'DROP', 'DUMPFILE', 'DUPLICATE', 'DYNAMIC', 'ELSE', 'ENCLOSED', 'END', 'ENGINE', 'ENGINE_TYPE', 'ENGINES', 'ESCAPE', 'ESCAPED', 'EVENTS', 'EXECUTE',
+        'DO', 'DUMPFILE', 'DUPLICATE', 'DYNAMIC', 'ELSE', 'ENCLOSED', 'END', 'ENGINE', 'ENGINE_TYPE', 'ENGINES', 'ESCAPE', 'ESCAPED', 'EVENTS', 'EXECUTE',
         'EXISTS', 'EXPLAIN', 'EXTENDED', 'FAST', 'FIELDS', 'FILE', 'FIRST', 'FIXED', 'FLUSH', 'FOR', 'FORCE', 'FOREIGN', 'FULL', 'FULLTEXT',
         'FUNCTION', 'GLOBAL', 'GRANT', 'GRANTS', 'GROUP_CONCAT', 'HEAP', 'HIGH_PRIORITY', 'HOSTS', 'HOUR', 'HOUR_MINUTE',
         'HOUR_SECOND', 'IDENTIFIED', 'IF', 'IGNORE', 'IN', 'INDEX', 'INDEXES', 'INFILE', 'INSERT', 'INSERT_ID', 'INSERT_METHOD', 'INTERVAL',
         'INTO', 'INVOKER', 'IS', 'ISOLATION', 'KEY', 'KEYS', 'KILL', 'LAST_INSERT_ID', 'LEADING', 'LEVEL', 'LIKE', 'LINEAR',
         'LINES', 'LOAD', 'LOCAL', 'LOCK', 'LOCKS', 'LOGS', 'LOW_PRIORITY', 'MARIA', 'MASTER', 'MASTER_CONNECT_RETRY', 'MASTER_HOST', 'MASTER_LOG_FILE',
         'MATCH', 'MEDIUM', 'MERGE', 'MINUTE', 'MINUTE_SECOND', 'MIN_ROWS', 'MODE', 'MODIFY',
-        'MONTH', 'MRG_MYISAM', 'MYISAM', 'NAMES', 'NATURAL', 'NOT', 'NOW', 'NULL', 'OFFSET', 'ON', 'OPEN', 'OPTIMIZE', 'OPTION', 'OPTIONALLY', 'OR',
+        'MONTH', 'MRG_MYISAM', 'MYISAM', 'NAMES', 'NATURAL', 'NOT', 'NOW', 'NULL', 'OFFSET', 'ON', 'OPEN', 'OPTIMIZE', 'OPTION', 'OPTIONALLY',
         'ON UPDATE', 'ON DELETE', 'OUTFILE', 'PACK_KEYS', 'PAGE', 'PARTIAL', 'PARTITION', 'PARTITIONS', 'PASSWORD', 'PRIMARY', 'PRIVILEGES', 'PROCEDURE',
         'PROCESS', 'PROCESSLIST', 'PURGE', 'QUICK', 'RANGE', 'READ', 'READ_ONLY',
         'READ_WRITE', 'REFERENCES', 'REGEXP', 'RELOAD', 'RENAME', 'REPAIR', 'REPEATABLE', 'REPLACE', 'REPLICATION', 'RESET', 'RESTORE', 'RESTRICT',
         'RETURN', 'RETURNS', 'REVOKE', 'RLIKE', 'ROLLBACK', 'ROW', 'ROWS', 'ROW_FORMAT', 'SECOND', 'SECURITY', 'SEPARATOR',
-        'SERIALIZABLE', 'SESSION', 'SET', 'SHARE', 'SHOW', 'SHUTDOWN', 'SLAVE', 'SONAME', 'SOUNDS', 'SQL',
+        'SERIALIZABLE', 'SESSION', 'SHARE', 'SHOW', 'SHUTDOWN', 'SLAVE', 'SONAME', 'SOUNDS', 'SQL',
         'SQL_CACHE', 'SQL_NO_CACHE', 'START', 'STARTING', 'STATUS', 'STOP', 'STORAGE',
         'STRAIGHT_JOIN', 'STRING', 'SUPER', 'TABLE', 'TABLES', 'TEMPORARY', 'TERMINATED', 'THEN', 'TO', 'TRAILING', 'TRANSACTIONAL',
         'TRUNCATE', 'TYPE', 'TYPES', 'UNCOMMITTED', 'UNIQUE', 'UNLOCK', 'UNSIGNED', 'USAGE', 'USE', 'USING', 'VARIABLES',
-        'VIEW', 'WHEN', 'WITH', 'WORK', 'WRITE', 'XOR', 'YEAR_MONTH'
+        'VIEW', 'WHEN', 'WITH', 'WORK', 'WRITE', 'YEAR_MONTH'
     );
 
     // For SQL formatting
     // These keywords will all be on their own line
-    protected static $special_reserved = array(
-        'SELECT', 'FROM', 'WHERE', 'SET', 'ORDER BY', 'GROUP BY', 'LEFT JOIN', 'OUTER JOIN', 'INNER JOIN', 'RIGHT JOIN', 'JOIN', 'LIMIT',
+    protected static $reserved_toplevel = array(
+        'SELECT', 'FROM', 'WHERE', 'SET', 'ORDER BY', 'GROUP BY', 'LIMIT', 'DROP',
         'VALUES', 'UPDATE', 'HAVING', 'ADD', 'AFTER', 'ALTER TABLE', 'DELETE FROM', 'UNION ALL', 'UNION', 'EXCEPT', 'INTERSECT'
+    );
+
+    protected static $reserved_newline = array(
+        'LEFT JOIN', 'RIGHT JOIN', 'OUTER JOIN', 'INNER JOIN', 'JOIN', 'XOR', 'OR', 'AND'
     );
 
     // Punctuation that can be used as a boundary between other tokens
@@ -105,7 +110,8 @@ class SqlFormatter
     // Regular expressions for tokenizing
     protected static $regex_boundaries;
     protected static $regex_reserved;
-    protected static $regex_special_reserved;
+    protected static $regex_reserved_newline;
+    protected static $regex_reserved_toplevel;
 
     // Cache variables
     // Only tokens shorter than this size will be cached.  Somewhere between 10 and 20 seems to work well for most cases.
@@ -139,7 +145,8 @@ class SqlFormatter
         // Set up regular expressions
         self::$regex_boundaries = '('.implode('|',array_map(array('SqlFormatter', 'quote_regex'),self::$boundaries)).')';
         self::$regex_reserved = '('.implode('|',array_map(array('SqlFormatter', 'quote_regex'),self::$reserved)).')';
-        self::$regex_special_reserved = str_replace(' ','\\s+','('.implode('|',array_map(array('SqlFormatter', 'quote_regex'),self::$special_reserved)).')');
+        self::$regex_reserved_toplevel = str_replace(' ','\\s+','('.implode('|',array_map(array('SqlFormatter', 'quote_regex'),self::$reserved_toplevel)).')');
+        self::$regex_reserved_newline = str_replace(' ','\\s+','('.implode('|',array_map(array('SqlFormatter', 'quote_regex'),self::$reserved_newline)).')');
 
         self::$init = true;
     }
@@ -222,10 +229,17 @@ class SqlFormatter
         // this makes it so in "mytable.from", "from" is not considered a reserved word
         if (!$previous || !isset($previous[self::TOKEN_VALUE]) || $previous[self::TOKEN_VALUE] !== '.') {
             $upper = strtoupper($string);
-            // Special Reserved Word
-            if(preg_match('/^('.self::$regex_special_reserved.')($|\s|'.self::$regex_boundaries.')/', $upper,$matches)) {
+            // Top Level Reserved Word
+            if(preg_match('/^('.self::$regex_reserved_toplevel.')($|\s|'.self::$regex_boundaries.')/', $upper,$matches)) {
                 return array(
-                    self::TOKEN_TYPE=>self::TOKEN_TYPE_SPECIAL_RESERVED,
+                    self::TOKEN_TYPE=>self::TOKEN_TYPE_RESERVED_TOPLEVEL,
+                    self::TOKEN_VALUE=>substr($string,0,strlen($matches[1]))
+                );
+            }
+            // Newline Reserved Word
+            if(preg_match('/^('.self::$regex_reserved_newline.')($|\s|'.self::$regex_boundaries.')/', $upper,$matches)) {
+                return array(
+                    self::TOKEN_TYPE=>self::TOKEN_TYPE_RESERVED_NEWLINE,
                     self::TOKEN_VALUE=>substr($string,0,strlen($matches[1]))
                 );
             }
@@ -425,7 +439,7 @@ class SqlFormatter
                     }
                     
                     // Reached an invalid token type for inline parentheses
-                    if ($next[self::TOKEN_TYPE]===self::TOKEN_TYPE_SPECIAL_RESERVED || $next[self::TOKEN_TYPE]===self::TOKEN_TYPE_COMMENT || $next[self::TOKEN_TYPE]===self::TOKEN_TYPE_BLOCK_COMMENT) {
+                    if ($next[self::TOKEN_TYPE]===self::TOKEN_TYPE_RESERVED_TOPLEVEL || $next[self::TOKEN_TYPE]===self::TOKEN_TYPE_RESERVED_NEWLINE || $next[self::TOKEN_TYPE]===self::TOKEN_TYPE_COMMENT || $next[self::TOKEN_TYPE]===self::TOKEN_TYPE_BLOCK_COMMENT) {
                         break;
                     }
                     
@@ -495,8 +509,8 @@ class SqlFormatter
                 $newline = true;
             }
            
-            // Special reserved words start a new line and increase the special indent level
-            elseif ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_SPECIAL_RESERVED) {
+            // Top level reserved words start a new line and increase the special indent level
+            elseif ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_RESERVED_TOPLEVEL) {
                 $increase_special_indent = true;
                
                 // If the last indent type was 'special', decrease the special indent for this round
@@ -506,15 +520,28 @@ class SqlFormatter
                     array_shift($indent_types);
                 }
                
-                // Add a newline after the special reserved word
+                // Add a newline after the top level reserved word
                 $newline = true;
-                // Add a newline before the special reserved word (if not already added)
+                // Add a newline before the top level reserved word (if not already added)
                 if(!$added_newline) {
                     $return .= "\n" . str_repeat($tab, $indent_level);
                 }
                 // If we already added a newline, redo the indentation since it may be different now
                 else {
                     $return = rtrim($return,$tab).str_repeat($tab, $indent_level);
+                }
+
+                // If the token may have extra whitespace
+                if (strpos($token[self::TOKEN_VALUE],' ')!==false || strpos($token[self::TOKEN_VALUE],"\n")!==false || strpos($token[self::TOKEN_VALUE],"\t")!==false) {
+                    $highlighted = preg_replace('/\s+/',' ',$highlighted);
+                }
+            }
+
+            // Newline reserved words start a new line
+            elseif ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_RESERVED_NEWLINE) {
+                // Add a newline before the reserved word (if not already added)
+                if(!$added_newline) {
+                    $return .= "\n" . str_repeat($tab, $indent_level);
                 }
 
                 // If the token may have extra whitespace
@@ -678,7 +705,10 @@ class SqlFormatter
         elseif($type===self::TOKEN_TYPE_RESERVED) {
             return self::highlightReservedWord($token);
         }
-        elseif($type===self::TOKEN_TYPE_SPECIAL_RESERVED) {
+        elseif($type===self::TOKEN_TYPE_RESERVED_TOPLEVEL) {
+            return self::highlightReservedWord($token);
+        }
+        elseif($type===self::TOKEN_TYPE_RESERVED_NEWLINE) {
             return self::highlightReservedWord($token);
         }
         elseif($type===self::TOKEN_TYPE_NUMBER) {
