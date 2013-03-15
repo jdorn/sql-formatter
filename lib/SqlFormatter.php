@@ -9,7 +9,7 @@
  * @copyright  2013 Jeremy Dorn
  * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @link       http://github.com/jdorn/sql-formatter
- * @version    1.2.6
+ * @version    1.2.7
  */
 class SqlFormatter
 {
@@ -66,7 +66,7 @@ class SqlFormatter
     // Punctuation that can be used as a boundary between other tokens
     protected static $boundaries = array(',', ';', ')', '(', '.', '=', '<', '>', '+', '-', '*', '/', '!', '^', '%', '|', '&', '#');
 
-    // For syntax highlighting
+    // For HTML syntax highlighting
     // Styles applied to different token types
     public static $quote_attributes = 'style="color: blue;"';
     public static $backtick_quote_attributes = 'style="color: purple;"';
@@ -77,6 +77,21 @@ class SqlFormatter
     public static $error_attributes = 'style="background-color: red;"';
     public static $comment_attributes = 'style="color: #aaa;"';
     public static $pre_attributes = 'style="color: black; background-color: white;"';
+    
+    // Boolean - whether or not the current environment is the CLI
+    // This affects the type of syntax highlighting
+    // If not defined, it will be determined automatically
+    public static $cli;
+    
+    // For CLI syntax highlighting
+    public static $cli_quote = "\x1b[34;1m";
+    public static $cli_backtick_quote = "\x1b[35;1m";
+    public static $cli_reserved = "\x1b[37m";
+    public static $cli_boundary = "";
+    public static $cli_number = "\x1b[32;1m";
+    public static $cli_word = "";
+    public static $cli_error = "\x1b[31;1;7m";
+    public static $cli_comment = "\x1b[30;1m";
 
     // The tab character to use when formatting SQL
     public static $tab = '  ';
@@ -640,7 +655,13 @@ class SqlFormatter
     protected static function highlightToken($token)
     {
         $type = $token[self::TOKEN_TYPE];
-        $token = htmlentities($token[self::TOKEN_VALUE],ENT_COMPAT,'UTF-8');
+        
+        if(self::is_cli()) {
+            $token = $token[self::TOKEN_VALUE];
+        }
+        else {
+            $token = htmlentities($token[self::TOKEN_VALUE],ENT_COMPAT,'UTF-8');
+        }
 
         if($type===self::TOKEN_TYPE_BOUNDARY) {
             return self::highlightBoundary($token);
@@ -679,7 +700,12 @@ class SqlFormatter
      */
     protected static function highlightQuote($value)
     {
-        return '<span ' . self::$quote_attributes . '>' . $value . '</span>';
+        if(self::is_cli()) {
+            return self::$cli_quote . $value . "\x1b[0m";
+        }
+        else {
+            return '<span ' . self::$quote_attributes . '>' . $value . '</span>';
+        }
     }
 
     /**
@@ -690,7 +716,12 @@ class SqlFormatter
      * @return String HTML code of the highlighted token.
      */
     protected static function highlightBacktickQuote($value) {
-        return '<span ' . self::$backtick_quote_attributes . '>' . $value . '</span>';
+        if(self::is_cli()) {
+            return self::$cli_backtick_quote . $value . "\x1b[0m";
+        }
+        else {
+            return '<span ' . self::$backtick_quote_attributes . '>' . $value . '</span>';
+        }
     }
 
     /**
@@ -702,7 +733,12 @@ class SqlFormatter
      */
     protected static function highlightReservedWord($value)
     {
-        return '<span ' . self::$reserved_attributes . '>' . $value . '</span>';
+        if(self::is_cli()) {
+            return self::$cli_reserved . $value . "\x1b[0m";
+        }
+        else {
+            return '<span ' . self::$reserved_attributes . '>' . $value . '</span>';
+        }
     }
 
     /**
@@ -716,7 +752,12 @@ class SqlFormatter
     {
         if($value==='(' || $value===')') return $value;
         
-        return '<span ' . self::$boundary_attributes . '>' . $value . '</span>';
+        if(self::is_cli()) {
+            return self::$cli_boundary . $value . "\x1b[0m";
+        }
+        else {
+            return '<span ' . self::$boundary_attributes . '>' . $value . '</span>';
+        }
     }
 
     /**
@@ -728,7 +769,12 @@ class SqlFormatter
      */
     protected static function highlightNumber($value)
     {
-        return '<span ' . self::$number_attributes . '>' . $value . '</span>';
+        if(self::is_cli()) {
+            return self::$cli_number . $value . "\x1b[0m";
+        }
+        else {
+            return '<span ' . self::$number_attributes . '>' . $value . '</span>';
+        }
     }
 
     /**
@@ -740,7 +786,12 @@ class SqlFormatter
      */
     protected static function highlightError($value)
     {
-        return '<span ' . self::$error_attributes . '>' . $value . '</span>';
+        if(self::is_cli()) {
+            return self::$cli_error . $value . "\x1b[0m";
+        }
+        else {
+            return '<span ' . self::$error_attributes . '>' . $value . '</span>';
+        }
     }
 
     /**
@@ -752,7 +803,12 @@ class SqlFormatter
      */
     protected static function highlightComment($value)
     {
-        return '<span ' . self::$comment_attributes . '>' . $value . '</span>';
+        if(self::is_cli()) {
+            return self::$cli_comment . $value . "\x1b[0m";
+        }
+        else {
+            return '<span ' . self::$comment_attributes . '>' . $value . '</span>';
+        }
     }
 
     /**
@@ -764,7 +820,12 @@ class SqlFormatter
      */
     protected static function highlightWord($value)
     {
-        return '<span ' . self::$word_attributes . '>' . $value . '</span>';
+        if(self::is_cli()) {
+            return self::$cli_word . $value . "\x1b[0m";
+        }
+        else {
+            return '<span ' . self::$word_attributes . '>' . $value . '</span>';
+        }
     }
 
     /**
@@ -801,10 +862,20 @@ class SqlFormatter
      */
     private static function output($string)
     {
-    	$string=trim($string);
-    	if(!self::$use_pre) {
-    	    return $string;
-    	}
-    	return '<pre '.self::$pre_attributes.'>' . $string . '</pre>';
+        if(self::is_cli()) {
+            return $string."\n";
+        }
+        else {
+            $string=trim($string);
+            if(!self::$use_pre) {
+                return $string;
+            }
+            return '<pre '.self::$pre_attributes.'>' . $string . '</pre>';
+        }
+    }
+    
+    private static function is_cli() {
+        if(isset(self::$cli)) return self::$cli;
+        else return php_sapi_name() === 'cli';
     }
 }

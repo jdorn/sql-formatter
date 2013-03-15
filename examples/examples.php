@@ -31,7 +31,7 @@
 <body>
 <?php
 
-require_once('../lib/SqlFormatter.php');
+require_once(__DIR__.'/../lib/SqlFormatter.php');
 
 // Example statements for formatting and highlighting
 $statements = array(
