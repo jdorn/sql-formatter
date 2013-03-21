@@ -128,12 +128,8 @@ CREATE TABLE IF NOT EXISTS `PREFIX_specific_price_rule` (
   `to` datetime NOT NULL, 
   PRIMARY KEY (`id_specific_price_rule`), 
   KEY `id_product` (
-    `id_shop`, 
-    `id_currency`, 
-    `id_country`, 
-    `id_group`, 
-    `from_quantity`, 
-    `from`, 
+    `id_shop`, `id_currency`, `id_country`, 
+    `id_group`, `from_quantity`, `from`, 
     `to`
   )
 ) ENGINE = ENGINE_TYPE DEFAULT CHARSET = utf8
@@ -465,27 +461,13 @@ AFTER
 INSERT INTO `PREFIX_cms_category_lang` 
 VALUES 
   (
-    1, 
-    3, 
-    'Inicio', 
-    '', 
-    'home', 
-    NULL, 
-    NULL, 
+    1, 3, 'Inicio', '', 'home', NULL, NULL, 
     NULL
   )
 
 INSERT INTO `PREFIX_cms_category` 
 VALUES 
-  (
-    1, 
-    0, 
-    0, 
-    1, 
-    NOW(), 
-    NOW(), 
-    0
-  )
+  (1, 0, 0, 1, NOW(), NOW(), 0)
 
 UPDATE 
   `PREFIX_cms_category` 
@@ -507,18 +489,10 @@ AFTER
   `email`
 
 INSERT INTO `PREFIX_specific_price` (
-  `id_product`, 
-  `id_shop`, 
-  `id_currency`, 
-  `id_country`, 
-  `id_group`, 
-  `priority`, 
-  `price`, 
-  `from_quantity`, 
-  `reduction`, 
-  `reduction_type`, 
-  `from`, 
-  `to`
+  `id_product`, `id_shop`, `id_currency`, 
+  `id_country`, `id_group`, `priority`, 
+  `price`, `from_quantity`, `reduction`, 
+  `reduction_type`, `from`, `to`
 ) (
   SELECT 
     dq.`id_product`, 
@@ -530,40 +504,28 @@ INSERT INTO `PREFIX_specific_price` (
     0.00, 
     dq.`quantity`, 
     IF(
-      dq.`id_discount_type` = 2, 
-      dq.`value`, 
+      dq.`id_discount_type` = 2, dq.`value`, 
       dq.`value` / 100
     ), 
     IF (
-      dq.`id_discount_type` = 2, 
-      'amount', 
+      dq.`id_discount_type` = 2, 'amount', 
       'percentage'
     ), 
     '0000-00-00 00:00:00', 
     '0000-00-00 00:00:00' 
   FROM 
     `PREFIX_discount_quantity` dq 
-    INNER JOIN `PREFIX_product` p ON (
-      p.`id_product` = dq.`id_product`
-    )
+    INNER JOIN `PREFIX_product` p ON (p.`id_product` = dq.`id_product`)
 )
 
 DROP 
   TABLE `PREFIX_discount_quantity`
 
 INSERT INTO `PREFIX_specific_price` (
-  `id_product`, 
-  `id_shop`, 
-  `id_currency`, 
-  `id_country`, 
-  `id_group`, 
-  `priority`, 
-  `price`, 
-  `from_quantity`, 
-  `reduction`, 
-  `reduction_type`, 
-  `from`, 
-  `to`
+  `id_product`, `id_shop`, `id_currency`, 
+  `id_country`, `id_group`, `priority`, 
+  `price`, `from_quantity`, `reduction`, 
+  `reduction_type`, `from`, `to`
 ) (
   SELECT 
     p.`id_product`, 
@@ -575,24 +537,20 @@ INSERT INTO `PREFIX_specific_price` (
     0.00, 
     1, 
     IF(
-      p.`reduction_price` > 0, 
-      p.`reduction_price`, 
+      p.`reduction_price` > 0, p.`reduction_price`, 
       p.`reduction_percent` / 100
     ), 
     IF(
-      p.`reduction_price` > 0, 
-      'amount', 
+      p.`reduction_price` > 0, 'amount', 
       'percentage'
     ), 
     IF (
       p.`reduction_from` = p.`reduction_to`, 
-      '0000-00-00 00:00:00', 
-      p.`reduction_from`
+      '0000-00-00 00:00:00', p.`reduction_from`
     ), 
     IF (
       p.`reduction_from` = p.`reduction_to`, 
-      '0000-00-00 00:00:00', 
-      p.`reduction_to`
+      '0000-00-00 00:00:00', p.`reduction_to`
     ) 
   FROM 
     `PREFIX_product` p 
@@ -613,78 +571,49 @@ DROP
   `reduction_to`
 
 INSERT INTO `PREFIX_configuration` (
-  `name`, 
-  `value`, 
-  `date_add`, 
-  `date_upd`
+  `name`, `value`, `date_add`, `date_upd`
 ) 
 VALUES 
   (
     'PS_SPECIFIC_PRICE_PRIORITIES', 
     'id_shop;id_currency;id_country;id_group', 
-    NOW(), 
+    NOW(), NOW()
+  ), 
+  ('PS_TAX_DISPLAY', 0, NOW(), NOW()), 
+  (
+    'PS_SMARTY_FORCE_COMPILE', 1, NOW(), 
     NOW()
   ), 
   (
-    'PS_TAX_DISPLAY', 
-    0, 
-    NOW(), 
+    'PS_DISTANCE_UNIT', 'km', NOW(), NOW()
+  ), 
+  (
+    'PS_STORES_DISPLAY_CMS', 0, NOW(), 
     NOW()
   ), 
   (
-    'PS_SMARTY_FORCE_COMPILE', 
-    1, 
-    NOW(), 
+    'PS_STORES_DISPLAY_FOOTER', 0, NOW(), 
     NOW()
   ), 
   (
-    'PS_DISTANCE_UNIT', 
-    'km', 
-    NOW(), 
-    NOW()
-  ), 
-  (
-    'PS_STORES_DISPLAY_CMS', 
-    0, 
-    NOW(), 
-    NOW()
-  ), 
-  (
-    'PS_STORES_DISPLAY_FOOTER', 
-    0, 
-    NOW(), 
-    NOW()
-  ), 
-  (
-    'PS_STORES_SIMPLIFIED', 
-    0, 
-    NOW(), 
+    'PS_STORES_SIMPLIFIED', 0, NOW(), 
     NOW()
   ), 
   (
     'PS_STATSDATA_CUSTOMER_PAGESVIEWS', 
-    1, 
-    NOW(), 
+    1, NOW(), NOW()
+  ), 
+  (
+    'PS_STATSDATA_PAGESVIEWS', 1, NOW(), 
     NOW()
   ), 
   (
-    'PS_STATSDATA_PAGESVIEWS', 
-    1, 
-    NOW(), 
-    NOW()
-  ), 
-  (
-    'PS_STATSDATA_PLUGINS', 
-    1, 
-    NOW(), 
+    'PS_STATSDATA_PLUGINS', 1, NOW(), 
     NOW()
   )
 
 INSERT INTO `PREFIX_configuration` (
-  `name`, 
-  `value`, 
-  `date_add`, 
-  `date_upd`
+  `name`, `value`, `date_add`, `date_upd`
 ) 
 VALUES 
   (
@@ -729,61 +658,30 @@ WHERE
   )
 
 INSERT INTO `PREFIX_hook` (
-  `name`, 
-  `title`, 
-  `description`, 
-  `position`
+  `name`, `title`, `description`, `position`
 ) 
 VALUES 
   (
-    'processCarrier', 
-    'Carrier Process', 
-    NULL, 
-    0
+    'processCarrier', 'Carrier Process', 
+    NULL, 0
   )
 
 INSERT INTO `PREFIX_stock_mvt_reason_lang` (
-  `id_stock_mvt_reason`, 
-  `id_lang`, 
+  `id_stock_mvt_reason`, `id_lang`, 
   `name`
 ) 
 VALUES 
+  (1, 1, 'Order'), 
+  (1, 2, 'Commande'), 
+  (2, 1, 'Missing Stock Movement'), 
   (
-    1, 
-    1, 
-    'Order'
+    2, 2, 'Mouvement de stock manquant'
   ), 
-  (
-    1, 
-    2, 
-    'Commande'
-  ), 
-  (
-    2, 
-    1, 
-    'Missing Stock Movement'
-  ), 
-  (
-    2, 
-    2, 
-    'Mouvement de stock manquant'
-  ), 
-  (
-    3, 
-    1, 
-    'Restocking'
-  ), 
-  (
-    3, 
-    2, 
-    'RÃ©assort'
-  )
+  (3, 1, 'Restocking'), 
+  (3, 2, 'RÃ©assort')
 
 INSERT INTO `PREFIX_meta_lang` (
-  `id_lang`, 
-  `id_meta`, 
-  `title`, 
-  `url_rewrite`
+  `id_lang`, `id_meta`, `title`, `url_rewrite`
 ) 
 VALUES 
   (

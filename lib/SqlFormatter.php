@@ -9,7 +9,7 @@
  * @copyright  2013 Jeremy Dorn
  * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @link       http://github.com/jdorn/sql-formatter
- * @version    1.2.7
+ * @version    1.2.8
  */
 class SqlFormatter
 {
@@ -41,11 +41,11 @@ class SqlFormatter
         'DO', 'DUMPFILE', 'DUPLICATE', 'DYNAMIC', 'ELSE', 'ENCLOSED', 'END', 'ENGINE', 'ENGINE_TYPE', 'ENGINES', 'ESCAPE', 'ESCAPED', 'EVENTS', 'EXECUTE',
         'EXISTS', 'EXPLAIN', 'EXTENDED', 'FAST', 'FIELDS', 'FILE', 'FIRST', 'FIXED', 'FLUSH', 'FOR', 'FORCE', 'FOREIGN', 'FULL', 'FULLTEXT',
         'FUNCTION', 'GLOBAL', 'GRANT', 'GRANTS', 'GROUP_CONCAT', 'HEAP', 'HIGH_PRIORITY', 'HOSTS', 'HOUR', 'HOUR_MINUTE',
-        'HOUR_SECOND', 'IDENTIFIED', 'IF', 'IGNORE', 'IN', 'INDEX', 'INDEXES', 'INFILE', 'INSERT', 'INSERT_ID', 'INSERT_METHOD', 'INTERVAL',
+        'HOUR_SECOND', 'IDENTIFIED', 'IF', 'IFNULL', 'IGNORE', 'IN', 'INDEX', 'INDEXES', 'INFILE', 'INSERT', 'INSERT_ID', 'INSERT_METHOD', 'INTERVAL',
         'INTO', 'INVOKER', 'IS', 'ISOLATION', 'KEY', 'KEYS', 'KILL', 'LAST_INSERT_ID', 'LEADING', 'LEVEL', 'LIKE', 'LINEAR',
         'LINES', 'LOAD', 'LOCAL', 'LOCK', 'LOCKS', 'LOGS', 'LOW_PRIORITY', 'MARIA', 'MASTER', 'MASTER_CONNECT_RETRY', 'MASTER_HOST', 'MASTER_LOG_FILE',
         'MATCH', 'MEDIUM', 'MERGE', 'MINUTE', 'MINUTE_SECOND', 'MIN_ROWS', 'MODE', 'MODIFY',
-        'MONTH', 'MRG_MYISAM', 'MYISAM', 'NAMES', 'NATURAL', 'NOT', 'NOW', 'NULL', 'OFFSET', 'ON', 'OPEN', 'OPTIMIZE', 'OPTION', 'OPTIONALLY',
+        'MONTH', 'MRG_MYISAM', 'MYISAM', 'NAMES', 'NATURAL', 'NOT', 'NOW()', 'NULL', 'OFFSET', 'ON', 'OPEN', 'OPTIMIZE', 'OPTION', 'OPTIONALLY',
         'ON UPDATE', 'ON DELETE', 'OUTFILE', 'PACK_KEYS', 'PAGE', 'PARTIAL', 'PARTITION', 'PARTITIONS', 'PASSWORD', 'PRIMARY', 'PRIVILEGES', 'PROCEDURE',
         'PROCESS', 'PROCESSLIST', 'PURGE', 'QUICK', 'RANGE', 'READ', 'READ_ONLY',
         'READ_WRITE', 'REFERENCES', 'REGEXP', 'RELOAD', 'RENAME', 'REPAIR', 'REPEATABLE', 'REPLACE', 'REPLICATION', 'RESET', 'RESTORE', 'RESTRICT',
@@ -358,17 +358,23 @@ class SqlFormatter
         $increase_block_indent = false;
         $indent_types = array();
         $added_newline = false;
-
+        $inline_count = 0;
+        $inline_indented = false;
+        
         // Tokenize String
-        $tokens = self::tokenize($string);
+        $original_tokens = self::tokenize($string);
+        
+        // Remove existing whitespace
+        $tokens = array();
+        foreach ($original_tokens as $i=>$token) {
+            if ($token[self::TOKEN_TYPE] !== self::TOKEN_TYPE_WHITESPACE) {
+                $token['i'] = $i;
+                $tokens[] = $token;
+            }
+        }
 
         // Format token by token
-        foreach ($tokens as $i=>$token) {
-            // Don't process whitespace
-            if ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_WHITESPACE) {
-                continue;
-            }
-            
+        foreach ($tokens as $i=>$token) {            
             // Get highlighted token if doing syntax highlighting
             if ($highlight) {
                 $highlighted = self::highlightToken($token);
@@ -388,7 +394,7 @@ class SqlFormatter
                 $increase_block_indent = false;
                 array_unshift($indent_types,'block');
             }
-           
+
             // Display comments directly where they appear in the source
             if ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_COMMENT || $token[self::TOKEN_TYPE] === self::TOKEN_TYPE_BLOCK_COMMENT) {
                 if ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_BLOCK_COMMENT) {
@@ -409,27 +415,51 @@ class SqlFormatter
             else {
                 $added_newline = false;
             }
+            
+            if($inline_parentheses) {
+                // End of inline parentheses
+                if($token[self::TOKEN_VALUE] === ')') {
+                    $return = rtrim($return,' ');
+                    
+                    if($inline_indented) {
+                        array_shift($indent_types);
+                        $indent_level --;
+                        $return .= "\n" . str_repeat($tab, $indent_level);
+                    }
+                    
+                    $inline_parentheses = false;
+                    
+                    $return .= $highlighted . ' ';
+                    continue;
+                }
+                
+                if($token[self::TOKEN_VALUE] === ',') {
+                    if($inline_count >= 30) {
+                        $inline_count = 0;
+                        $newline = true;
+                    }
+                }
+                
+                $inline_count += strlen($token[self::TOKEN_VALUE]);
+            }
 
             // Opening parentheses increase the block indent level and start a new line
             if ($token[self::TOKEN_VALUE] === '(') {
                 // First check if this should be an inline parentheses block
                 // Examples are "NOW()", "COUNT(*)", "int(10)", key(`somecolumn`), DECIMAL(7,2)
                 // Allow up to 3 non-whitespace tokens inside inline parentheses
-                $nonwhitespace = 0;
-                for($j=1;$j<=8;$j++) {
+                $length = 0;
+                for($j=1;$j<=250;$j++) {
                     // Reached end of string
                     if(!isset($tokens[$i+$j])) break;
                     
                     $next = $tokens[$i+$j];
-                    
-                    // Ignore whitespace
-                    if($next[self::TOKEN_TYPE]===self::TOKEN_TYPE_WHITESPACE) {
-                        continue;
-                    }
                    
-                    // Reached closing parentheses
+                    // Reached closing parentheses, able to inline it
                     if($next[self::TOKEN_VALUE] === ')') {
                         $inline_parentheses = true;
+                        $inline_count = 0;
+                        $inline_indented = false;
                         break;
                     }
                     
@@ -443,16 +473,17 @@ class SqlFormatter
                         break;
                     }
                     
-                    // Too many tokens for inline parentheses
-                    if ($nonwhitespace >= 3) {
-                        break;
-                    }
-                    
-                    $nonwhitespace++;
+                    $length += strlen($next[self::TOKEN_VALUE]);
+                }
+                
+                if($inline_parentheses && $length > 30) {
+                    $increase_block_indent = true;
+                    $inline_indented = true;
+                    $newline = true;
                 }
                
                 // Take out the preceding space unless there was whitespace there in the original query
-                if (isset($tokens[$i-1]) && $tokens[$i-1][self::TOKEN_TYPE] !== self::TOKEN_TYPE_WHITESPACE) {
+                if (isset($original_tokens[$token['i']-1]) && $original_tokens[$token['i']-1][self::TOKEN_TYPE] !== self::TOKEN_TYPE_WHITESPACE) {
                     $return = rtrim($return,' ');
                 }
                
@@ -468,40 +499,33 @@ class SqlFormatter
             elseif ($token[self::TOKEN_VALUE] === ')') {
                 // Remove whitespace before the closing parentheses
                 $return = rtrim($return,' ');
-                   
-                // If we are in an inline parentheses section
-                if($inline_parentheses) {
-                    $inline_parentheses = false;
-                }
-                else {
-                    $indent_level--;
-           
-                    // Reset indent level
-                    while($j=array_shift($indent_types)) {
-                        if($j==='special') {
-                            $indent_level--;
-                        }
-                        else {
-                            break;
-                        }
+               
+                $indent_level--;
+       
+                // Reset indent level
+                while($j=array_shift($indent_types)) {
+                    if($j==='special') {
+                        $indent_level--;
                     }
-                   
-                    if($indent_level < 0) {
-                        // This is an error
-                        $indent_level = 0;
-                       
-                        if ($highlight) {
-                            $return .= "\n".self::highlightError($token[self::TOKEN_VALUE]);
-                            continue;
-                        }
-                    }
-                   
-                    // Add a newline before the closing parentheses (if not already added)
-                    if(!$added_newline) {
-                        $return .= "\n" . str_repeat($tab, $indent_level);
+                    else {
+                        break;
                     }
                 }
                
+                if($indent_level < 0) {
+                    // This is an error
+                    $indent_level = 0;
+                   
+                    if ($highlight) {
+                        $return .= "\n".self::highlightError($token[self::TOKEN_VALUE]);
+                        continue;
+                    }
+                }
+               
+                // Add a newline before the closing parentheses (if not already added)
+                if(!$added_newline) {
+                    $return .= "\n" . str_repeat($tab, $indent_level);
+                }               
             }
            
             // Commas start a new line (unless within inline parentheses)
@@ -553,7 +577,9 @@ class SqlFormatter
             // Multiple boundary characters in a row should not have spaces between them (not including parentheses)
             elseif($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_BOUNDARY) {
                 if($tokens[$i-1][self::TOKEN_TYPE] === self::TOKEN_TYPE_BOUNDARY) {
-                    $return = rtrim($return, ' ');
+                    if (isset($original_tokens[$token['i']-1]) && $original_tokens[$token['i']-1][self::TOKEN_TYPE] !== self::TOKEN_TYPE_WHITESPACE) {
+                        $return = rtrim($return,' ');
+                    }
                 }
             }
 
