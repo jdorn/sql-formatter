@@ -1,9 +1,213 @@
-<!DOCTYPE html/>
-<html>
-	<head>
-		<title>SqlFormatter - A lightweight php class for formatting SQL statements</title>
-	</head>
-	<body>
-		<p>This is a placeholder</p>
-	</body>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>SqlFormatter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SqlFormatter - A PHP class for formatting and highlighting SQL statements.">
+    <meta name="author" content="Jeremy Dorn">
+
+    <!-- Le styles -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/prettify.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 20px;
+        padding-bottom: 40px;
+      }
+    </style>
+    <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
+    
+    <script src="js/prettify.js"></script>
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+
+  <body onload="prettyPrint();">
+
+    <div class="container">
+    
+      <section>      
+        <h2>SqlFormatter</h2>
+        <p>A PHP class for formatting and highlighting SQL statements.</p>
+        <p>
+	  <a href='https://travis-ci.org/jdorn/sql-formatter'><img src='https://travis-ci.org/jdorn/sql-formatter.png?branch=master' alt='Build Status'/></a>
+	  <a href='https://github.com/jdorn/sql-formatter' class='btn btn-small'>View on Github</a>
+        </p>
+      </section>
+
+      <hr>
+      
+      <section>
+	<h3>Download</h3>
+      
+	<p>If you're using Composer in your project, simply add SqlFormatter to the require section of <code>composer.json</code></p>
+      
+	<pre class='prettyprint lang-js'>require: {
+  "jdorn/sql-formatter": "dev-master"
+}</pre>
+
+	<p>Otherwise, <a href='https://github.com/jdorn/sql-formatter/archive/master.zip' class='btn btn-success btn-small'>Download</a> from Github 
+      and include <code>lib/SqlFormatter.php</code> in your project.</p>
+      </section>
+      
+      <hr>
+
+      <section>
+	<h3>Example Usage</h3>
+    
+	<p>The following example formats and highlights a really complex SQL statement.</p>
+      
+	<pre class='prettyprint lang-php'>&lt;?php
+$sql = "SELECT DATE_FORMAT(b.t_create, '%Y-%c-%d') dateID, b.title memo 
+    FROM (SELECT id FROM orc_scheme_detail d WHERE d.business=208 
+    AND d.type IN (29,30,31,321,33,34,3542,361,327,38,39,40,41,42,431,4422,415,4546,47,48,'a',
+    29,30,31,321,33,34,3542,361,327,38,39,40,41,42,431,4422,415,4546,47,48,'a') 
+    AND d.title IS NOT NULL AND t_create >= 
+    DATE_FORMAT((DATE_SUB(NOW(),INTERVAL 1 DAY)),'%Y-%c-%d') AND t_create 
+    &lt; DATE_FORMAT(NOW(), '%Y-%c-%d') ORDER BY d.id LIMIT 2,10) a, 
+    orc_scheme_detail b WHERE a.id = b.id";
+    
+echo SqlFormatter::format($sql);</pre>
+
+	<pre style="color: black; background-color: white;"><span style="font-weight:bold;">SELECT</span> 
+  <span style="color: #333;">DATE_FORMAT</span>(<span style="color: #333;">b</span><span>.</span><span style="color: #333;">t_create</span><span>,</span> <span style="color: blue;">'%Y-%c-%d'</span>) <span style="color: #333;">dateID</span><span>,</span> 
+  <span style="color: #333;">b</span><span>.</span><span style="color: #333;">title</span> <span style="color: #333;">memo</span> 
+<span style="font-weight:bold;">FROM</span> 
+  (
+    <span style="font-weight:bold;">SELECT</span> 
+      <span style="color: #333;">id</span> 
+    <span style="font-weight:bold;">FROM</span> 
+      <span style="color: #333;">orc_scheme_detail</span> <span style="color: #333;">d</span> 
+    <span style="font-weight:bold;">WHERE</span> 
+      <span style="color: #333;">d</span><span>.</span><span style="color: #333;">business</span> <span>=</span> <span style="color: green;">208</span> 
+      <span style="font-weight:bold;">AND</span> <span style="color: #333;">d</span><span>.</span><span style="color: #333;">type</span> <span style="font-weight:bold;">IN</span> (
+        <span style="color: green;">29</span><span>,</span> <span style="color: green;">30</span><span>,</span> <span style="color: green;">31</span><span>,</span> <span style="color: green;">321</span><span>,</span> <span style="color: green;">33</span><span>,</span> <span style="color: green;">34</span><span>,</span> <span style="color: green;">3542</span><span>,</span> <span style="color: green;">361</span><span>,</span> <span style="color: green;">327</span><span>,</span> 
+        <span style="color: green;">38</span><span>,</span> <span style="color: green;">39</span><span>,</span> <span style="color: green;">40</span><span>,</span> <span style="color: green;">41</span><span>,</span> <span style="color: green;">42</span><span>,</span> <span style="color: green;">431</span><span>,</span> <span style="color: green;">4422</span><span>,</span> <span style="color: green;">415</span><span>,</span> <span style="color: green;">4546</span><span>,</span> 
+        <span style="color: green;">47</span><span>,</span> <span style="color: green;">48</span><span>,</span> <span style="color: blue;">'a'</span><span>,</span> <span style="color: green;">29</span><span>,</span> <span style="color: green;">30</span><span>,</span> <span style="color: green;">31</span><span>,</span> <span style="color: green;">321</span><span>,</span> <span style="color: green;">33</span><span>,</span> <span style="color: green;">34</span><span>,</span> <span style="color: green;">3542</span><span>,</span> 
+        <span style="color: green;">361</span><span>,</span> <span style="color: green;">327</span><span>,</span> <span style="color: green;">38</span><span>,</span> <span style="color: green;">39</span><span>,</span> <span style="color: green;">40</span><span>,</span> <span style="color: green;">41</span><span>,</span> <span style="color: green;">42</span><span>,</span> <span style="color: green;">431</span><span>,</span> <span style="color: green;">4422</span><span>,</span> 
+        <span style="color: green;">415</span><span>,</span> <span style="color: green;">4546</span><span>,</span> <span style="color: green;">47</span><span>,</span> <span style="color: green;">48</span><span>,</span> <span style="color: blue;">'a'</span>
+      ) 
+      <span style="font-weight:bold;">AND</span> <span style="color: #333;">d</span><span>.</span><span style="color: #333;">title</span> <span style="font-weight:bold;">IS</span> <span style="font-weight:bold;">NOT</span> <span style="font-weight:bold;">NULL</span> 
+      <span style="font-weight:bold;">AND</span> <span style="color: #333;">t_create</span> <span>&gt;</span><span>=</span> <span style="color: #333;">DATE_FORMAT</span>(
+        (
+          <span style="color: #333;">DATE_SUB</span>(<span style="font-weight:bold;">NOW()</span><span>,</span> <span style="font-weight:bold;">INTERVAL</span> <span style="color: green;">1</span> <span style="font-weight:bold;">DAY</span>)
+        )<span>,</span> 
+        <span style="color: blue;">'%Y-%c-%d'</span>
+      ) 
+      <span style="font-weight:bold;">AND</span> <span style="color: #333;">t_create</span> <span>&lt;</span> <span style="color: #333;">DATE_FORMAT</span>(<span style="font-weight:bold;">NOW()</span><span>,</span> <span style="color: blue;">'%Y-%c-%d'</span>) 
+    <span style="font-weight:bold;">ORDER BY</span> 
+      <span style="color: #333;">d</span><span>.</span><span style="color: #333;">id</span> 
+    <span style="font-weight:bold;">LIMIT</span> 
+      <span style="color: green;">2</span><span>,</span> 
+      <span style="color: green;">10</span>
+  ) <span style="color: #333;">a</span><span>,</span> 
+  <span style="color: #333;">orc_scheme_detail</span> <span style="color: #333;">b</span> 
+<span style="font-weight:bold;">WHERE</span> 
+  <span style="color: #333;">a</span><span>.</span><span style="color: #333;">id</span> <span>=</span> <span style="color: #333;">b</span><span>.</span><span style="color: #333;">id</span></pre>
+      </section>
+      
+      <hr>
+      
+      <section>
+	<h3>Format Only (No Syntax Highlighting)</h3>
+      
+	<p>If you pass <code>false</code> as the 2nd parameter to the format method, it will output formatted plain text.</p>
+      
+	<pre class='prettyprint lang-php'>&lt;?php
+$sql = "SELECT * FROM MyTable WHERE id = 46";
+
+echo SqlFormatter::format($sql, false);</pre>
+
+	<pre style="color: black; background-color: white;">SELECT 
+  * 
+FROM 
+  MyTable 
+WHERE 
+  id = 46</pre>
+  
+      </section>
+
+      <hr>
+      
+      <section>      
+	<h3>Syntax Highlighting Only</h3>
+      
+	<p>The highlight method keeps all the original whitespace intact and just adds syntax highlighting.</p>
+      
+	<pre class='prettyprint lang-php'>&lt;?php
+$sql = "SELECT * FROM MyTable WHERE id = 46";
+
+echo SqlFormatter::highlight($sql);</pre>
+
+	<pre style="color: black; background-color: white;"><span style="font-weight:bold;">SELECT</span> <span>*</span> <span style="font-weight:bold;">FROM</span> <span style="color: #333;">MyTable</span> <span style="font-weight:bold;">WHERE</span> <span style="color: #333;">id</span> <span>=</span> <span style="color: green;">46</span></pre>
+      </section>
+      
+      <hr>
+      
+      <section>
+	<h3>Remove SQL Comments</h3>
+      
+	<p>The removeComments method removes all comments, but otherwise preserves the original formatting.</p>
+      
+	<pre class='prettyprint lang-php'>&lt;?php
+$sql = "-- This is a comment
+SELECT
+/* This is another comment
+On more than one line */
+Id #This is one final comment
+as temp, DateCreated as Created FROM MyTable;";
+
+echo SqlFormatter::removeComments($sql);</pre>
+
+	<pre style="color: black; background-color: white;">
+SELECT
+Id 
+as temp, DateCreated as Created FROM MyTable;</pre>
+
+      </section>
+    
+      <hr>
+    
+      <section>
+	<h3>Split SQL into Individual Queries</h3>
+      
+	<p>The splitQuery method takes a semicolon delimited SQL string and returns an array of the individual queries.</p>
+      
+	<pre class='prettyprint lang-php'>&lt;?php
+$sql = "DROP TABLE IF EXISTS MyTable;
+CREATE TABLE MyTable ( id int ); 
+INSERT INTO MyTable (id) VALUES (1),(2),(3),(4); SELECT * FROM MyTable;";
+
+var_export(SqlFormatter::splitQuery($sql));</pre>
+
+	<pre class='prettyprint lang-php'>array (
+  0 => 'DROP TABLE IF EXISTS MyTable;',
+  1 => 'CREATE TABLE MyTable ( id int );',
+  2 => 'INSERT INTO MyTable (id) VALUES (1),(2),(3),(4);',
+  3 => 'SELECT * FROM MyTable;'
+)</pre>
+      </section>  
+
+      <hr>
+    
+      <section>
+	<h3>Using from the PHP CLI</h3>
+    
+	<p>SqlFormatter will automatically detect when running in CLI mode and will use ASCII shell highlighting instead of HTML.</p>
+    
+	<img src='cli.png' alt="CLI syntax highlighting screenshot"/>
+      </section>
+    
+      <hr>
+
+      <div class="footer">
+	<p>Created by <a href='http://github.com/jdorn'>Jeremy Dorn</a></p>
+      </div>
+    </div> <!-- /container -->
+  </body>
 </html>
