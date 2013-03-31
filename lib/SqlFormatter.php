@@ -394,17 +394,6 @@ class SqlFormatter
                 $increase_block_indent = false;
                 array_unshift($indent_types,'block');
             }
-
-            // Display comments directly where they appear in the source
-            if ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_COMMENT || $token[self::TOKEN_TYPE] === self::TOKEN_TYPE_BLOCK_COMMENT) {
-                if ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_BLOCK_COMMENT) {
-                    $return .= "\n" . str_repeat($tab,$indent_level);
-                }
-
-                $return .= $highlighted;
-                $newline = true;
-                continue;
-            }
            
             // If we need a new line before the token
             if ($newline) {
@@ -414,6 +403,17 @@ class SqlFormatter
             }
             else {
                 $added_newline = false;
+            }
+            
+            // Display comments directly where they appear in the source
+            if ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_COMMENT || $token[self::TOKEN_TYPE] === self::TOKEN_TYPE_BLOCK_COMMENT) {
+                if ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_BLOCK_COMMENT) {
+                    $return .= "\n" . str_repeat($tab,$indent_level);
+                }
+
+                $return .= $highlighted;
+                $newline = true;
+                continue;
             }
             
             if($inline_parentheses) {
