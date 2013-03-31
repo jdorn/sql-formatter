@@ -408,7 +408,9 @@ class SqlFormatter
             // Display comments directly where they appear in the source
             if ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_COMMENT || $token[self::TOKEN_TYPE] === self::TOKEN_TYPE_BLOCK_COMMENT) {
                 if ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_BLOCK_COMMENT) {
-                    $return .= "\n" . str_repeat($tab,$indent_level);
+                    $indent = str_repeat($tab,$indent_level);
+                    $return .= "\n" . $indent;
+                    $highlighted = str_replace("\n","\n".$indent,$highlighted);
                 }
 
                 $return .= $highlighted;
