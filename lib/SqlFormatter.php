@@ -7,9 +7,9 @@
  * @author     Jeremy Dorn <jeremy@jeremydorn.com>
  * @author     Florin Patan <florinpatan@gmail.com>
  * @copyright  2013 Jeremy Dorn
- * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @license    http://opensource.org/licenses/MIT
  * @link       http://github.com/jdorn/sql-formatter
- * @version    1.2.8
+ * @version    1.2.9
  */
 class SqlFormatter
 {

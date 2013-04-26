@@ -4,7 +4,7 @@
     "homepage": "https://github.com/jdorn/sql-formatter/",
     "keywords": ["sql", "highlight"],
     "minimum-stability": "dev",
-    "license": "LGPL",
+    "license": "MIT",
     "type": "library",
     "require": {
         "php": ">=5.2.4"
