@@ -183,6 +183,30 @@ $comment_statements = array(
 </table>
 
 
+<h1>Compress Query</h1>
+
+<div>
+    Usage:
+    <pre>
+    <?php highlight_string('<?php' . "\n" . '$compressed = SqlFormatter::compress($sql);' . "\n" . '?>'); ?>
+    </pre>
+</div>
+<table>
+    <tr>
+        <th>Original</th>
+        <th>Compressed</th>
+    </tr>
+    <?php foreach ($statements as $sql) { ?>
+    <tr>
+        <td>
+            <pre><?php echo $sql; ?></pre>
+        </td>
+        <td><pre><?php echo SqlFormatter::compress($sql); ?></pre></td>
+    </tr>
+    <?php }    ?>
+</table>
+
+
 <h1>Splitting SQL Strings Into Individual Queries</h1>
 
 <div>
