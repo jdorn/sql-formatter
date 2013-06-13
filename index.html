@@ -16,6 +16,9 @@
         padding-top: 20px;
         padding-bottom: 40px;
       }
+      pre {
+        color: white;
+      }
     </style>
     <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
     
@@ -145,6 +148,28 @@ $sql = "SELECT * FROM MyTable WHERE id = 46";
 echo SqlFormatter::highlight($sql);</pre>
 
 	<pre style="color: black; background-color: white;"><span style="font-weight:bold;">SELECT</span> <span>*</span> <span style="font-weight:bold;">FROM</span> <span style="color: #333;">MyTable</span> <span style="font-weight:bold;">WHERE</span> <span style="color: #333;">id</span> <span>=</span> <span style="color: green;">46</span></pre>
+      </section>
+      
+      <hr>
+      
+            <section>
+	<h3>Compress SQL Query</h3>
+      
+	<p>The compress method compresses whitespace and removes comments.</p>
+      
+	<pre class='prettyprint lang-php'>&lt;?php
+$sql = "-- This is a comment
+SELECT
+/* This is another comment
+On more than one line */
+Id #This is one final comment
+as temp, DateCreated as Created FROM MyTable;";
+
+echo SqlFormatter::compress($sql);</pre>
+
+	<pre style="color: black; background-color: white;">
+SELECT Id as temp, DateCreated as Created FROM MyTable;</pre>
+
       </section>
       
       <hr>
