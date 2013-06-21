@@ -145,7 +145,7 @@ class SqlFormatter
                 // "(word/whitespace/boundary)"
                 $next_token = self::getNextToken(substr($string, 1));
                 if (isset($string[strlen($next_token['token']) + 1]) && $string[strlen($next_token['token']) + 1] === ')') {
-                    if (in_array($next_token['type'], array('word', 'whitespace', 'boundary'))) {
+                    if (in_array($next_token['type'], array('word', 'whitespace', 'boundary', 'number'))) {
                         return array(
                             'token'=>'(' . $next_token['token'] . ')',
                             'type'=>'word'
