@@ -1,5 +1,5 @@
 {
-    "name": "jdorn/sql-formatter",
+    "name": "rajibahmed/sql-formatter",
     "description": "a PHP SQL highlighting library",
     "homepage": "https://github.com/jdorn/sql-formatter/",
     "keywords": ["sql", "highlight"],
