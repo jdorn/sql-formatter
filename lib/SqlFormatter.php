@@ -696,7 +696,7 @@ class SqlFormatter
 
             $result .= $token[self::TOKEN_VALUE];
         }
-
+		$result = self::remove_blank_lines($result);
         return $result;
     }
 
@@ -978,4 +978,15 @@ class SqlFormatter
         if(isset(self::$cli)) return self::$cli;
         else return php_sapi_name() === 'cli';
     }
+	
+	/**
+	*@param String  $sql from which blank lines need to be removed
+	*
+	* @return String sql without blank lines
+	*/
+	private static function remove_blank_lines($sql)
+	{
+	 return preg_replace('/^\n+|^[\t\s]*\n+/m','',$sql);
+	}
+}
 }
