@@ -44,6 +44,11 @@ $statements = array(
     < DATE_FORMAT(NOW(), '%Y-%c-%d') ORDER BY d.id LIMIT 2,10) a, 
     orc_scheme_detail b WHERE a.id = b.id",
 
+    "SELECT * from Table1 LEFT OUTER JOIN Table2 on Table1.id = Table2.id",
+    
+    "SELECT * from Table1 LEFT 
+    OUTER JOIN Table2 on Table1.id = Table2.id",
+    
     "SELECT * FROM MyTable WHERE id = 46",
 
     "SELECT count(*),`Column1`,`Testing`, `Testing Three` FROM `Table1`
