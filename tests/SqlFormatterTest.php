@@ -72,7 +72,7 @@ class SqlFormatterTest extends PHPUnit_Framework_TestCase {
 	}
 	
 	function testRemoveComments() {
-		$expected = SqlFormatter::format("SELECT\n * FROM\n MyTable",false);
+		$expected = SqlFormatter::format("SELECT\n * FROM\n MyTable");
 		$sql = "/* this is a comment */SELECT#This is another comment\n * FROM-- One final comment\n MyTable";
 		$actual = SqlFormatter::removeComments($sql);
 		
