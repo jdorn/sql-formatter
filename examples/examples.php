@@ -43,15 +43,13 @@ $statements = array(
     DATE_FORMAT((DATE_SUB(NOW(),INTERVAL 1 DAY)),'%Y-%c-%d') AND t_create 
     < DATE_FORMAT(NOW(), '%Y-%c-%d') ORDER BY d.id LIMIT 2,10) a, 
     orc_scheme_detail b WHERE a.id = b.id",
-
-    "SELECT * from Table1 LEFT OUTER JOIN Table2 on Table1.id = Table2.id",
     
     "SELECT * from Table1 LEFT 
     OUTER JOIN Table2 on Table1.id = Table2.id",
     
     "SELECT * FROM MyTable WHERE id = 46",
 
-    "SELECT count(*),`Column1`,`Testing`, `Testing Three` FROM `Table1`
+    "SELECT count(*),`Column1` as count,`Testing`, `Testing Three` FROM `Table1`
     WHERE Column1 = 'testing' AND ( (`Column2` = `Column3` OR Column4 >= NOW()) )
     GROUP BY Column1 ORDER BY Column3 DESC LIMIT 5,10",
 
