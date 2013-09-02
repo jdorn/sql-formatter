@@ -9,7 +9,7 @@
  * @copyright  2013 Jeremy Dorn
  * @license    http://opensource.org/licenses/MIT
  * @link       http://github.com/jdorn/sql-formatter
- * @version    1.2.12
+ * @version    1.2.13
  */
 class SqlFormatter
 {
@@ -26,6 +26,7 @@ class SqlFormatter
     const TOKEN_TYPE_BLOCK_COMMENT = 9;
     const TOKEN_TYPE_NUMBER = 10;
     const TOKEN_TYPE_ERROR = 11;
+    const TOKEN_TYPE_VARIABLE = 12;
 
     // Constants for different components of a token
     const TOKEN_TYPE = 0;
@@ -101,7 +102,7 @@ class SqlFormatter
     );
 
     // Punctuation that can be used as a boundary between other tokens
-    protected static $boundaries = array(',', ';', ')', '(', '.', '=', '<', '>', '+', '-', '*', '/', '!', '^', '%', '|', '&', '#');
+    protected static $boundaries = array(',', ';',':', ')', '(', '.', '=', '<', '>', '+', '-', '*', '/', '!', '^', '%', '|', '&', '#');
 
     // For HTML syntax highlighting
     // Styles applied to different token types
@@ -113,6 +114,7 @@ class SqlFormatter
     public static $word_attributes = 'style="color: #333;"';
     public static $error_attributes = 'style="background-color: red;"';
     public static $comment_attributes = 'style="color: #aaa;"';
+    public static $variable_attributes = 'style="color: orange;"';
     public static $pre_attributes = 'style="color: black; background-color: white;"';
 
     // Boolean - whether or not the current environment is the CLI
@@ -130,6 +132,7 @@ class SqlFormatter
     public static $cli_error = "\x1b[31;1;7m";
     public static $cli_comment = "\x1b[30;1m";
     public static $cli_functions = "\x1b[37m";
+    public static $cli_variable = "\x1b[36;1m";
 
     // The tab character to use when formatting SQL
     public static $tab = '  ';
@@ -173,7 +176,7 @@ class SqlFormatter
      */
     protected static function init()
     {
-        if(self::$init) return;
+        if (self::$init) return;
 
         // Sort reserved word list from longest word to shortest
         usort(self::$reserved, array('SqlFormatter', 'sortLength'));
@@ -233,22 +236,40 @@ class SqlFormatter
         if ($string[0]==='"' || $string[0]==='\'' || $string[0]==='`') {
             $return = array(
                 self::TOKEN_TYPE => ($string[0]==='`'? self::TOKEN_TYPE_BACKTICK_QUOTE : self::TOKEN_TYPE_QUOTE),
-                self::TOKEN_VALUE => $string
+                self::TOKEN_VALUE => self::getQuotedString($string)
             );
-
-            // This checks for the following patterns:
-            // 1. backtick quoted string using `` to escape
-            // 2. double quoted string using "" or \" to escape
-            // 3. single quoted string using '' or \' to escape
-            if ( preg_match('/^(((`[^`]*($|`))+)|(("[^"\\\\]*(?:\\\\.[^"\\\\]*)*("|$))+)|((\'[^\'\\\\]*(?:\\\\.[^\'\\\\]*)*(\'|$))+))/s', $string, $matches)) {
-                $return[self::TOKEN_VALUE] = $matches[1];
+            
+            // If a quote was opened, but doesn't have a closing quote, return the remaining string
+            if ($return[self::TOKEN_VALUE] === null) {
+                $return[self::TOKEN_VALUE] = $string;
             }
-
+            
             return $return;
         }
+        
+        // User-defined Variable
+        if ($string[0] === '@' && isset($string[1])) {
+            // If the variable name is quoted
+            if ($string[1]==='"' || $string[1]==='\'' || $string[1]==='`') {
+                return array(
+                    self::TOKEN_VALUE => '@'.self::getQuotedString(substr($string,1)),
+                    self::TOKEN_TYPE => self::TOKEN_TYPE_VARIABLE
+                );
+            }
+            // Non-quoted variable name
+            else {
+                preg_match('/^(@[a-zA-Z0-9\._\$]+)/',$string,$matches);
+                if ($matches) {
+                    return array(
+                        self::TOKEN_VALUE => $matches[1],
+                        self::TOKEN_TYPE => self::TOKEN_TYPE_VARIABLE
+                    );
+                }
+            }
+        }
 
-        // Number
-        if (preg_match('/^([0-9]+(\.[0-9]+)?)($|\s|"\'`|'.self::$regex_boundaries.')/',$string,$matches)) {
+        // Number (decimal, binary, or hex)
+        if (preg_match('/^([0-9]+(\.[0-9]+)?|0x[0-9a-fA-F]+|0b[01]+)($|\s|"\'`|'.self::$regex_boundaries.')/',$string,$matches)) {
             return array(
                 self::TOKEN_VALUE => $matches[1],
                 self::TOKEN_TYPE=>self::TOKEN_TYPE_NUMBER
@@ -308,6 +329,17 @@ class SqlFormatter
             self::TOKEN_VALUE => $matches[1],
             self::TOKEN_TYPE  => self::TOKEN_TYPE_WORD
         );
+    }
+
+    protected static function getQuotedString($string) {
+        // This checks for the following patterns:
+        // 1. backtick quoted string using `` to escape
+        // 2. double quoted string using "" or \" to escape
+        // 3. single quoted string using '' or \' to escape
+        if ( preg_match('/^(((`[^`]*($|`))+)|(("[^"\\\\]*(?:\\\\.[^"\\\\]*)*("|$))+)|((\'[^\'\\\\]*(?:\\\\.[^\'\\\\]*)*(\'|$))+))/s', $string, $matches)) {
+            return $matches[1];
+        }
+        return null;
     }
 
     /**
@@ -500,7 +532,7 @@ class SqlFormatter
                 $length = 0;
                 for ($j=1;$j<=250;$j++) {
                     // Reached end of string
-                    if(!isset($tokens[$i+$j])) break;
+                    if (!isset($tokens[$i+$j])) break;
 
                     $next = $tokens[$i+$j];
 
@@ -823,6 +855,8 @@ class SqlFormatter
             return self::highlightReservedWord($token);
         } elseif ($type===self::TOKEN_TYPE_NUMBER) {
             return self::highlightNumber($token);
+        } elseif ($type===self::TOKEN_TYPE_VARIABLE) {
+            return self::highlightVariable($token);
         } elseif ($type===self::TOKEN_TYPE_COMMENT || $type===self::TOKEN_TYPE_BLOCK_COMMENT) {
             return self::highlightComment($token);
         }
@@ -887,7 +921,7 @@ class SqlFormatter
      */
     protected static function highlightBoundary($value)
     {
-        if($value==='(' || $value===')') return $value;
+        if ($value==='(' || $value===')') return $value;
 
         if (self::is_cli()) {
             return self::$cli_boundary . $value . "\x1b[0m";
@@ -959,6 +993,22 @@ class SqlFormatter
             return '<span ' . self::$word_attributes . '>' . $value . '</span>';
         }
     }
+    
+    /**
+     * Highlights a variable token
+     *
+     * @param String $value The token's value
+     *
+     * @return String HTML code of the highlighted token.
+     */
+    protected static function highlightVariable($value)
+    {
+        if (self::is_cli()) {
+            return self::$cli_variable . $value . "\x1b[0m";
+        } else {
+            return '<span ' . self::$variable_attributes . '>' . $value . '</span>';
+        }
+    }
 
     /**
      * Helper function for sorting the list of reserved words by length
@@ -1008,7 +1058,7 @@ class SqlFormatter
 
     private static function is_cli()
     {
-        if(isset(self::$cli)) return self::$cli;
+        if (isset(self::$cli)) return self::$cli;
         else return php_sapi_name() === 'cli';
     }
 

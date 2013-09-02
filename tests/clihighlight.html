@@ -207,7 +207,7 @@
 	[35;1m`value`[0m text[0m
 )
 
-[37mSET[0m @defaultOOS[0m =[0m ([37mSELECT[0m value[0m [37mFROM[0m [35;1m`PREFIX_configuration`[0m [37mWHERE[0m name[0m =[0m [34;1m'PS_ORDER_OUT_OF_STOCK'[0m)
+[37mSET[0m [36;1m@defaultOOS[0m =[0m ([37mSELECT[0m value[0m [37mFROM[0m [35;1m`PREFIX_configuration`[0m [37mWHERE[0m name[0m =[0m [34;1m'PS_ORDER_OUT_OF_STOCK'[0m)
 
 [37mUPDATE[0m [35;1m`PREFIX_product`[0m p[0m [37mSET[0m [35;1m`cache_default_attribute`[0m =[0m  [32;1m0[0m [37mWHERE[0m [35;1m`id_product`[0m [37mNOT[0m [37mIN[0m ([37mSELECT[0m [35;1m`id_product`[0m [37mFROM[0m [35;1m`PREFIX_product_attribute`[0m)
 
