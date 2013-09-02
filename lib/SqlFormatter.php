@@ -238,15 +238,15 @@ class SqlFormatter
                 self::TOKEN_TYPE => ($string[0]==='`'? self::TOKEN_TYPE_BACKTICK_QUOTE : self::TOKEN_TYPE_QUOTE),
                 self::TOKEN_VALUE => self::getQuotedString($string)
             );
-            
+
             // If a quote was opened, but doesn't have a closing quote, return the remaining string
             if ($return[self::TOKEN_VALUE] === null) {
                 $return[self::TOKEN_VALUE] = $string;
             }
-            
+
             return $return;
         }
-        
+
         // User-defined Variable
         if ($string[0] === '@' && isset($string[1])) {
             // If the variable name is quoted
@@ -331,7 +331,8 @@ class SqlFormatter
         );
     }
 
-    protected static function getQuotedString($string) {
+    protected static function getQuotedString($string)
+    {
         // This checks for the following patterns:
         // 1. backtick quoted string using `` to escape
         // 2. double quoted string using "" or \" to escape
@@ -339,6 +340,7 @@ class SqlFormatter
         if ( preg_match('/^(((`[^`]*($|`))+)|(("[^"\\\\]*(?:\\\\.[^"\\\\]*)*("|$))+)|((\'[^\'\\\\]*(?:\\\\.[^\'\\\\]*)*(\'|$))+))/s', $string, $matches)) {
             return $matches[1];
         }
+
         return null;
     }
 
@@ -993,7 +995,7 @@ class SqlFormatter
             return '<span ' . self::$word_attributes . '>' . $value . '</span>';
         }
     }
-    
+
     /**
      * Highlights a variable token
      *
