@@ -642,8 +642,8 @@ class SqlFormatter
                 }
             }
             
-            //Checks if there is another SQL command after the LIMIT clause. If yes, not suppress newline
-            elseif ($token[self::TOKEN_VALUE] === ';' &&  $clause_limit === true) {
+            // Checks if we are out of the limit clause
+            elseif ($clause_limit && $token[self::TOKEN_VALUE] !== "," && $token[self::TOKEN_TYPE] !== self::TOKEN_TYPE_NUMBER && $token[self::TOKEN_TYPE] !== self::TOKEN_TYPE_WHITESPACE) {
                 $clause_limit = false; 
             }
 
