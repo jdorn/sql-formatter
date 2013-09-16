@@ -642,6 +642,11 @@ class SqlFormatter
                 }
             }
             
+            //Checks if there is another SQL command after the LIMIT clause. If yes, not suppress newline
+            elseif ($token[self::TOKEN_VALUE] === ';' &&  $clause_limit === true) {
+                $clause_limit = false; 
+            }
+
             // Commas start a new line (unless within inline parentheses or SQL 'LIMIT' clause)
             elseif ($token[self::TOKEN_VALUE] === ',' && !$inline_parentheses) {
                 //If the previous TOKEN_VALUE is 'LIMIT', resets new line
