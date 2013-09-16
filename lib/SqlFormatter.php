@@ -610,11 +610,6 @@ class SqlFormatter
                 }
             }
 
-            // Commas start a new line (unless within inline parentheses)
-            elseif ($token[self::TOKEN_VALUE] === ',' && !$inline_parentheses) {
-                $newline = true;
-            }
-
             // Top level reserved words start a new line and increase the special indent level
             elseif ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_RESERVED_TOPLEVEL) {
                 $increase_special_indent = true;
@@ -641,6 +636,23 @@ class SqlFormatter
                 if (strpos($token[self::TOKEN_VALUE],' ')!==false || strpos($token[self::TOKEN_VALUE],"\n")!==false || strpos($token[self::TOKEN_VALUE],"\t")!==false) {
                     $highlighted = preg_replace('/\s+/',' ',$highlighted);
                 }
+                //if SQL 'LIMIT' clause, start variable to reset newline
+                if ($token[self::TOKEN_VALUE] === 'LIMIT' && !$inline_parentheses) {
+                    $clause_limit = true;
+                }
+            }
+            
+            // Commas start a new line (unless within inline parentheses or SQL 'LIMIT' clause)
+            elseif ($token[self::TOKEN_VALUE] === ',' && !$inline_parentheses) {
+                //If the previous TOKEN_VALUE is 'LIMIT', resets new line
+                if ($clause_limit === true) {
+                    $newline = false;
+                    $clause_limit = false;  
+                }
+                // All other cases of commas 
+                else {
+                    $newline = true;
+                }    
             }
 
             // Newline reserved words start a new line
