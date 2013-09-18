@@ -9,7 +9,7 @@
  * @copyright  2013 Jeremy Dorn
  * @license    http://opensource.org/licenses/MIT
  * @link       http://github.com/jdorn/sql-formatter
- * @version    1.2.13
+ * @version    1.2.14
  */
 class SqlFormatter
 {
@@ -442,6 +442,7 @@ class SqlFormatter
         $added_newline = false;
         $inline_count = 0;
         $inline_indented = false;
+        $clause_limit = false;
 
         // Tokenize String
         $original_tokens = self::tokenize($string);
@@ -641,10 +642,10 @@ class SqlFormatter
                     $clause_limit = true;
                 }
             }
-            
+
             // Checks if we are out of the limit clause
             elseif ($clause_limit && $token[self::TOKEN_VALUE] !== "," && $token[self::TOKEN_TYPE] !== self::TOKEN_TYPE_NUMBER && $token[self::TOKEN_TYPE] !== self::TOKEN_TYPE_WHITESPACE) {
-                $clause_limit = false; 
+                $clause_limit = false;
             }
 
             // Commas start a new line (unless within inline parentheses or SQL 'LIMIT' clause)
@@ -652,12 +653,12 @@ class SqlFormatter
                 //If the previous TOKEN_VALUE is 'LIMIT', resets new line
                 if ($clause_limit === true) {
                     $newline = false;
-                    $clause_limit = false;  
+                    $clause_limit = false;
                 }
-                // All other cases of commas 
+                // All other cases of commas
                 else {
                     $newline = true;
-                }    
+                }
             }
 
             // Newline reserved words start a new line

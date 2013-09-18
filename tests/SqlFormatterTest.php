@@ -30,7 +30,7 @@ class SqlFormatterTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testCliHighlight($sql, $html) {
 		SqlFormatter::$cli = true;
-		$this->assertEquals(trim($html), trim(SqlFormatter::highlight($sql)));
+		$this->assertEquals(trim($html), trim(SqlFormatter::format($sql)));
 		SqlFormatter::$cli = false;
 	}
 	/**
@@ -180,7 +180,7 @@ class SqlFormatterTest extends PHPUnit_Framework_TestCase {
 			$compress[] = trim(SqlFormatter::compress($sql));
 			
 			SqlFormatter::$cli = true;
-			$clihighlight[] = trim(SqlFormatter::highlight($sql));
+			$clihighlight[] = trim(SqlFormatter::format($sql));
 			SqlFormatter::$cli = false;
 		}
 		
