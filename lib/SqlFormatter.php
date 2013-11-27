@@ -184,12 +184,12 @@ class SqlFormatter
         self::$reserved = array_keys($reservedMap);
 
         // Set up regular expressions
-        self::$regex_boundaries = '('.implode('|',array_map(array('SqlFormatter', 'quote_regex'),self::$boundaries)).')';
-        self::$regex_reserved = '('.implode('|',array_map(array('SqlFormatter', 'quote_regex'),self::$reserved)).')';
-        self::$regex_reserved_toplevel = str_replace(' ','\\s+','('.implode('|',array_map(array('SqlFormatter', 'quote_regex'),self::$reserved_toplevel)).')');
-        self::$regex_reserved_newline = str_replace(' ','\\s+','('.implode('|',array_map(array('SqlFormatter', 'quote_regex'),self::$reserved_newline)).')');
+        self::$regex_boundaries = '('.implode('|',array_map(array(__CLASS__, 'quote_regex'),self::$boundaries)).')';
+        self::$regex_reserved = '('.implode('|',array_map(array(__CLASS__, 'quote_regex'),self::$reserved)).')';
+        self::$regex_reserved_toplevel = str_replace(' ','\\s+','('.implode('|',array_map(array(__CLASS__, 'quote_regex'),self::$reserved_toplevel)).')');
+        self::$regex_reserved_newline = str_replace(' ','\\s+','('.implode('|',array_map(array(__CLASS__, 'quote_regex'),self::$reserved_newline)).')');
 
-        self::$regex_function = '('.implode('|',array_map(array('SqlFormatter', 'quote_regex'),self::$functions)).')';
+        self::$regex_function = '('.implode('|',array_map(array(__CLASS__, 'quote_regex'),self::$functions)).')';
 
         self::$init = true;
     }
