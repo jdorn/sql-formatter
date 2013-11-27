@@ -9,7 +9,7 @@
  * @copyright  2013 Jeremy Dorn
  * @license    http://opensource.org/licenses/MIT
  * @link       http://github.com/jdorn/sql-formatter
- * @version    1.2.15
+ * @version    1.2.16
  */
 class SqlFormatter
 {
@@ -241,33 +241,29 @@ class SqlFormatter
                 self::TOKEN_VALUE => self::getQuotedString($string)
             );
 
-            // If a quote was opened, but doesn't have a closing quote, return the remaining string
-            if ($return[self::TOKEN_VALUE] === null) {
-                $return[self::TOKEN_VALUE] = $string;
-            }
-
             return $return;
         }
 
         // User-defined Variable
         if ($string[0] === '@' && isset($string[1])) {
+            $ret = array(
+                self::TOKEN_VALUE => null,
+                self::TOKEN_TYPE => self::TOKEN_TYPE_VARIABLE
+            );
+            
             // If the variable name is quoted
             if ($string[1]==='"' || $string[1]==='\'' || $string[1]==='`') {
-                return array(
-                    self::TOKEN_VALUE => '@'.self::getQuotedString(substr($string,1)),
-                    self::TOKEN_TYPE => self::TOKEN_TYPE_VARIABLE
-                );
+                $ret[self::TOKEN_VALUE] = '@'.self::getQuotedString(substr($string,1));
             }
             // Non-quoted variable name
             else {
                 preg_match('/^(@[a-zA-Z0-9\._\$]+)/',$string,$matches);
                 if ($matches) {
-                    return array(
-                        self::TOKEN_VALUE => $matches[1],
-                        self::TOKEN_TYPE => self::TOKEN_TYPE_VARIABLE
-                    );
+                    $ret[self::TOKEN_VALUE] = $matches[1];
                 }
             }
+            
+            if($ret[self::TOKEN_VALUE] !== null) return $ret;
         }
 
         // Number (decimal, binary, or hex)
@@ -335,15 +331,17 @@ class SqlFormatter
 
     protected static function getQuotedString($string)
     {
+        $ret = null;
+        
         // This checks for the following patterns:
         // 1. backtick quoted string using `` to escape
         // 2. double quoted string using "" or \" to escape
         // 3. single quoted string using '' or \' to escape
         if ( preg_match('/^(((`[^`]*($|`))+)|(("[^"\\\\]*(?:\\\\.[^"\\\\]*)*("|$))+)|((\'[^\'\\\\]*(?:\\\\.[^\'\\\\]*)*(\'|$))+))/s', $string, $matches)) {
-            return $matches[1];
+            $ret = $matches[1];
         }
-
-        return null;
+        
+        return $ret;
     }
 
     /**
@@ -696,6 +694,14 @@ class SqlFormatter
             if ($token[self::TOKEN_VALUE] === '(' || $token[self::TOKEN_VALUE] === '.') {
                 $return = rtrim($return,' ');
             }
+            
+            // If this is the "-" of a negative number, it shouldn't have a space after it
+            if($token[self::TOKEN_VALUE] === '-' && isset($tokens[$i+1]) && $tokens[$i+1][self::TOKEN_TYPE] === self::TOKEN_TYPE_NUMBER && isset($tokens[$i-1])) {
+                $prev = $tokens[$i-1][self::TOKEN_TYPE];
+                if($prev !== self::TOKEN_TYPE_QUOTE && $prev !== self::TOKEN_TYPE_BACKTICK_QUOTE && $prev !== self::TOKEN_TYPE_WORD && $prev !== self::TOKEN_TYPE_NUMBER) {
+                    $return = rtrim($return,' ');
+                }
+            } 
         }
 
         // If there are unmatched parentheses
