@@ -9,7 +9,7 @@
  * @copyright  2013 Jeremy Dorn
  * @license    http://opensource.org/licenses/MIT
  * @link       http://github.com/jdorn/sql-formatter
- * @version    1.2.16
+ * @version    1.2.17
  */
 class SqlFormatter
 {
@@ -676,7 +676,7 @@ class SqlFormatter
 
             // Multiple boundary characters in a row should not have spaces between them (not including parentheses)
             elseif ($token[self::TOKEN_TYPE] === self::TOKEN_TYPE_BOUNDARY) {
-                if ($tokens[$i-1][self::TOKEN_TYPE] === self::TOKEN_TYPE_BOUNDARY) {
+                if (isset($tokens[$i-1]) && $tokens[$i-1][self::TOKEN_TYPE] === self::TOKEN_TYPE_BOUNDARY) {
                     if (isset($original_tokens[$token['i']-1]) && $original_tokens[$token['i']-1][self::TOKEN_TYPE] !== self::TOKEN_TYPE_WHITESPACE) {
                         $return = rtrim($return,' ');
                     }
