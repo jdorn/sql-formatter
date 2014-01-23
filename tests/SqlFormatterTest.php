@@ -25,6 +25,21 @@ class SqlFormatterTest extends PHPUnit_Framework_TestCase {
 	function testHighlight($sql, $html) {
 		$this->assertEquals(trim($html), trim(SqlFormatter::highlight($sql)));
 	}
+
+    function testHighlightBinary() {
+        $sql = 'SELECT "' . pack('H*', "ed180e98a47a45b3bdd304b798bc5797") . '" AS BINARY';
+
+        if (defined('ENT_IGNORE')) {
+            // this is what gets written as string
+            $binaryData = '&quot;' . pack('H*', "180e7a450457") . '&quot;';
+        } else {
+            $binaryData = '';
+        }
+
+        $html = '<pre style="color: black; background-color: white;"><span style="font-weight:bold;">SELECT</span> <span style="color: blue;">' . $binaryData . '</span> <span style="font-weight:bold;">AS</span> <span style="color: #333;">BINARY</span></pre>';
+
+        $this->assertEquals(trim($html), trim(SqlFormatter::highlight($sql)));
+    }
 	/**
 	 * @dataProvider highlightCliData
 	 */
