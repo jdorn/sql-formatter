@@ -102,7 +102,7 @@ class SqlFormatter
     );
 
     // Punctuation that can be used as a boundary between other tokens
-    protected static $boundaries = array(',', ';',':', ')', '(', '.', '=', '<', '>', '+', '-', '*', '/', '!', '^', '%', '|', '&', '#');
+    protected static $boundaries = array(',', ';',':', ']', '[', ')', '(', '.', '=', '<', '>', '+', '-', '*', '/', '!', '^', '%', '|', '&', '#');
 
     // For HTML syntax highlighting
     // Styles applied to different token types
