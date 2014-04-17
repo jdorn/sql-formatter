@@ -9,7 +9,7 @@
  * @copyright  2013 Jeremy Dorn
  * @license    http://opensource.org/licenses/MIT
  * @link       http://github.com/jdorn/sql-formatter
- * @version    1.2.17
+ * @version    1.2.18
  */
 class SqlFormatter
 {
@@ -102,7 +102,7 @@ class SqlFormatter
     );
 
     // Punctuation that can be used as a boundary between other tokens
-    protected static $boundaries = array(',', ';',':', ']', '[', ')', '(', '.', '=', '<', '>', '+', '-', '*', '/', '!', '^', '%', '|', '&', '#');
+    protected static $boundaries = array(',', ';',':', ')', '(', '.', '=', '<', '>', '+', '-', '*', '/', '!', '^', '%', '|', '&', '#');
 
     // For HTML syntax highlighting
     // Styles applied to different token types
@@ -235,9 +235,9 @@ class SqlFormatter
         }
 
         // Quoted String
-        if ($string[0]==='"' || $string[0]==='\'' || $string[0]==='`') {
+        if ($string[0]==='"' || $string[0]==='\'' || $string[0]==='`' || $string[0]==='[') {
             $return = array(
-                self::TOKEN_TYPE => ($string[0]==='`'? self::TOKEN_TYPE_BACKTICK_QUOTE : self::TOKEN_TYPE_QUOTE),
+                self::TOKEN_TYPE => (($string[0]==='`' || $string[0]==='[')? self::TOKEN_TYPE_BACKTICK_QUOTE : self::TOKEN_TYPE_QUOTE),
                 self::TOKEN_VALUE => self::getQuotedString($string)
             );
 
@@ -335,9 +335,10 @@ class SqlFormatter
         
         // This checks for the following patterns:
         // 1. backtick quoted string using `` to escape
-        // 2. double quoted string using "" or \" to escape
-        // 3. single quoted string using '' or \' to escape
-        if ( preg_match('/^(((`[^`]*($|`))+)|(("[^"\\\\]*(?:\\\\.[^"\\\\]*)*("|$))+)|((\'[^\'\\\\]*(?:\\\\.[^\'\\\\]*)*(\'|$))+))/s', $string, $matches)) {
+        // 2. square bracket quoted string (SQL Server) using ]] to escape
+        // 3. double quoted string using "" or \" to escape
+        // 4. single quoted string using '' or \' to escape
+        if ( preg_match('/^(((`[^`]*($|`))+)|((\[[^\]]*($|\]))(\][^\]]*($|\]))*)|(("[^"\\\\]*(?:\\\\.[^"\\\\]*)*("|$))+)|((\'[^\'\\\\]*(?:\\\\.[^\'\\\\]*)*(\'|$))+))/s', $string, $matches)) {
             $ret = $matches[1];
         }
         

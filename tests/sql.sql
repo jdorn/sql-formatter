@@ -259,3 +259,5 @@ SELECT @ and b;
 SELECT @"weird variable name";
 
 SELECT "no closing quote
+
+SELECT [sqlserver] FROM [escap[e]]d style];
