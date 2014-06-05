@@ -1,5 +1,5 @@
 {
-    "name": "jdorn/sql-formatter",
+    "name": "rajibahmed/sql-formatter",
     "description": "a PHP SQL highlighting library",
     "homepage": "https://github.com/jdorn/sql-formatter/",
     "keywords": ["sql", "highlight"],
@@ -25,6 +25,12 @@
     "extra": {
         "branch-alias": {
             "dev-master": "1.3.x-dev"
-        }
-    }
+		}
+	},
+	"bin": [
+		"bin/sql-formatter"
+	],
+	"config": {
+		"bin-dir": "bin"
+	}
 }
