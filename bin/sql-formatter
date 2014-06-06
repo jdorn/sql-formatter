@@ -1,9 +1,10 @@
 #!/usr/bin/env php
 <?php
 if("cli" !== php_sapi_name()) {
-    echo "<p>Run this php script from the command line to see CLI syntax highlighting and formatting.  It support Unix pipes or command line argument style.</p>";
-    echo "<pre><code>php examples/cli.php \"SELECT * FROM MyTable WHERE (id>5 AND \\`name\\` LIKE \\&quot;testing\\&quot;);\"</code></pre>";
-    echo "<pre><code>echo \"SELECT * FROM MyTable WHERE (id>5 AND \\`name\\` LIKE \\&quot;testing\\&quot;);\" | php examples/cli.php</code></pre>";
+    echo "<p>Run this PHP script from the command line to see CLI syntax highlighting and formatting.  It supports Unix pipes or command line argument style.</p>";
+    echo "<pre><code>php bin/sql-formatter \"SELECT * FROM MyTable WHERE (id>5 AND \\`name\\` LIKE \\&quot;testing\\&quot;);\"</code></pre>";
+    echo "<pre><code>echo \"SELECT * FROM MyTable WHERE (id>5 AND \\`name\\` LIKE \\&quot;testing\\&quot;);\" | php bin/sql-formatter</code></pre>";
+    exit;
 }
 
 if(isset($argv[1])) {
