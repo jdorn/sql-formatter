@@ -37,4 +37,14 @@ function hasColorSupport() {
 
 $highlight = hasColorSupport();
 
-echo SqlFormatter::format($sql, $highlight);
+$queries = SqlFormatter::splitQuery($sql);
+$i = 1;
+$multipleQueries = count($queries) > 1;
+foreach ($queries as $query) {
+    if ($multipleQueries) {
+        echo PHP_EOL;
+        echo '== Query #' . $i . ' ==' . PHP_EOL;
+    }
+    echo SqlFormatter::format($query, $highlight);
+    $i++;
+}
