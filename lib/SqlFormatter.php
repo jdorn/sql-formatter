@@ -245,7 +245,7 @@ class SqlFormatter
         }
 
         // User-defined Variable
-        if ($string[0] === '@' && isset($string[1])) {
+        if (($string[0] === '@' || $string[0] === ':') && isset($string[1])) {
             $ret = array(
                 self::TOKEN_VALUE => null,
                 self::TOKEN_TYPE => self::TOKEN_TYPE_VARIABLE
@@ -253,11 +253,11 @@ class SqlFormatter
             
             // If the variable name is quoted
             if ($string[1]==='"' || $string[1]==='\'' || $string[1]==='`') {
-                $ret[self::TOKEN_VALUE] = '@'.self::getQuotedString(substr($string,1));
+                $ret[self::TOKEN_VALUE] = $string[0].self::getQuotedString(substr($string,1));
             }
             // Non-quoted variable name
             else {
-                preg_match('/^(@[a-zA-Z0-9\._\$]+)/',$string,$matches);
+                preg_match('/^('.$string[0].'[a-zA-Z0-9\._\$]+)/',$string,$matches);
                 if ($matches) {
                     $ret[self::TOKEN_VALUE] = $matches[1];
                 }
