@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SqlFormatter Javascript Examples</title>
+    <style>
+        .sql-quote {
+            color: blue;
+        }
+        .sql-backtick-quote {
+            color: purple;
+        }
+        .sql-reserved {
+            font-weight: bold;
+        }
+        .sql-function {
+            color: brown;
+        }
+        .sql-number {
+            color: green;
+        }
+        .sql-word {
+            color: #333;
+        }
+        .sql-comment, .sql-block-comment {
+            color: #aaa;
+        }
+        .sql-variable {
+            color: orange;
+        }
+        .sql-error {
+            background: lightcoral;
+            color: white;
+            padding: 2px;
+        }
+        
+        
+        
+        #input, #output {
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            padding: 8px;
+            font-family: monospace;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            margin: 0;
+            display: block;
+        }
+        #input {
+            left: 0;
+        }
+        #output {
+            right: 0;
+            overflow: auto;
+        }
+        .clear { clear: both; }
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <textarea id='input' placeholder='Paste SQL Here...'></textarea>
+        <pre id='output'></pre>
+    </div>
+    
+    
+<script src='../lib/SqlFormatter.js'></script>
+<script>
+    (function() {
+        var input = document.getElementById('input');
+        var output = document.getElementById('output');
+        
+        input.addEventListener('change',function(e) {
+           output.innerHTML = SqlFormatter.format(input.value); 
+        });
+        input.addEventListener('keyup',function(e) {
+           output.innerHTML = SqlFormatter.format(input.value); 
+        });
+    })();
+</script>
+</body>
+</html>
