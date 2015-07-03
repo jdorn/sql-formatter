@@ -1,5 +1,7 @@
 #!/usr/bin/env php
 <?php
+use jdorn\SqlFormatter\SqlFormatter;
+
 if("cli" !== php_sapi_name()) {
     echo "<p>Run this PHP script from the command line to see CLI syntax highlighting and formatting.  It supports Unix pipes or command line argument style.</p>";
     echo "<pre><code>php bin/sql-formatter \"SELECT * FROM MyTable WHERE (id>5 AND \\`name\\` LIKE \\&quot;testing\\&quot;);\"</code></pre>";
@@ -14,7 +16,7 @@ else {
     $sql = stream_get_contents(fopen("php://stdin", "r"));
 }
 
-require_once(__DIR__.'/../lib/SqlFormatter.php');
+require_once(__DIR__.'/../src/SqlFormatter.php');
 
 /**
  * Returns true if the stream supports colorization.

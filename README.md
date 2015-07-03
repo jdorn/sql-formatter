@@ -28,6 +28,8 @@ Sample usage:
 
 ```php
 <?php
+use jdorn\\SqlFormatter\SqlFormatter;
+
 require_once('SqlFormatter.php');
 
 $query = "SELECT count(*),`Column1`,`Testing`, `Testing Three` FROM `Table1`

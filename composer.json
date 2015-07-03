@@ -20,7 +20,14 @@
         }
     ],
     "autoload": {
-        "classmap": ["lib"]
+	"psr-4": {
+            "jdorn\\SqlFormatter\\": "src/"
+        }
+    },
+    "autoload-dev": {     
+        "psr-4": {
+            "jdorn\\SqlFormatter\\Tests\\": "tests/"
+        }
     },
     "extra": {
         "branch-alias": {
