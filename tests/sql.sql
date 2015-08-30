@@ -1,3 +1,5 @@
+select some_field, rank() over data_window from a_table window data_window as (partition by a_field order by field2 desc);
+
 SELECT customer_id, customer_name, COUNT(order_id) as total
 FROM customers INNER JOIN orders ON customers.customer_id = orders.customer_id
 GROUP BY customer_id, customer_name

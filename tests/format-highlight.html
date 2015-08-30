@@ -1,3 +1,15 @@
+<pre style="color: black; background-color: white;"><span style="font-weight:bold;">select</span> 
+  <span style="color: #333;">some_field</span><span >,</span> 
+  <span style="color: #333;">rank</span>() <span style="font-weight:bold;">over</span> <span style="color: #333;">data_window</span> 
+<span style="font-weight:bold;">from</span> 
+  <span style="color: #333;">a_table</span> 
+<span style="font-weight:bold;">window</span> 
+  <span style="color: #333;">data_window</span> <span style="font-weight:bold;">as</span> (
+    <span style="font-weight:bold;">partition</span> <span style="color: #333;">by</span> <span style="color: #333;">a_field</span> 
+    <span style="font-weight:bold;">order by</span> 
+      <span style="color: #333;">field2</span> <span style="font-weight:bold;">desc</span>
+  )<span >;</span></pre>
+
 <pre style="color: black; background-color: white;"><span style="font-weight:bold;">SELECT</span> 
   <span style="color: #333;">customer_id</span><span >,</span> 
   <span style="color: #333;">customer_name</span><span >,</span> 

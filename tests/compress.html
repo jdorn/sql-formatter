@@ -1,3 +1,5 @@
+select some_field, rank() over data_window from a_table window data_window as (partition by a_field order by field2 desc);
+
 SELECT customer_id, customer_name, COUNT(order_id) as total FROM customers INNER JOIN orders ON customers.customer_id = orders.customer_id GROUP BY customer_id, customer_name HAVING COUNT(order_id) > 5 ORDER BY COUNT(order_id) DESC;
 
 UPDATE customers SET totalorders = ordersummary.total FROM (SELECT customer_id, count(order_id) As total FROM orders GROUP BY customer_id) As ordersummary WHERE customers.customer_id = ordersummary.customer_id
