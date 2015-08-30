@@ -4,6 +4,6 @@ php:
   - 5.5
   - 5.4
   - 5.3
-  - hhvm-nightly
+  - hhvm
 
 script: phpunit --coverage-text
