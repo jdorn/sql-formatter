@@ -753,12 +753,18 @@ class SqlFormatter
         $queries = array();
         $current_query = '';
         $empty = true;
+        $lookForEnd = false;
 
         $tokens = self::tokenize($string);
 
         foreach ($tokens as $token) {
+
+            if ($token[self::TOKEN_VALUE] === 'BEGIN') {
+                $lookForEnd = true;
+            }
+
             // If this is a query separator
-            if ($token[self::TOKEN_VALUE] === ';') {
+            if ($token[self::TOKEN_VALUE] === ';' && !$lookForEnd) {
                 if (!$empty) {
                     $queries[] = $current_query.';';
                 }
@@ -770,6 +776,10 @@ class SqlFormatter
             // If this is a non-empty character
             if ($token[self::TOKEN_TYPE] !== self::TOKEN_TYPE_WHITESPACE && $token[self::TOKEN_TYPE] !== self::TOKEN_TYPE_COMMENT && $token[self::TOKEN_TYPE] !== self::TOKEN_TYPE_BLOCK_COMMENT) {
                 $empty = false;
+            }
+
+            if ($token[self::TOKEN_VALUE] === 'END') {
+                $lookForEnd = false;
             }
 
             $current_query .= $token[self::TOKEN_VALUE];
