@@ -1,5 +1,6 @@
 <?php
-require '../lib/SqlFormatter.php';
+use jdorn\SqlFormatter\SqlFormatter;
+require '../src/SqlFormatter.php';
 
 //this is the default value
 //set to '0' to disable caching
@@ -24,7 +25,7 @@ $chars = 0;
 foreach ($queries as $query) {
 	//do formatting and highlighting
 	SqlFormatter::format($query);
-	
+
 	$num++;
 	$chars += strlen($query);
 }

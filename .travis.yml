@@ -6,4 +6,4 @@ php:
   - 5.3
   - hhvm
 
-script: phpunit --coverage-text
+script: vendor/bin/phpunit --coverage-text

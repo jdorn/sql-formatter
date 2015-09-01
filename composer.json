@@ -7,7 +7,7 @@
     "license": "MIT",
     "type": "library",
     "require": {
-        "php": ">=5.2.4"
+        "php": ">=5.3"
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.*"
@@ -20,7 +20,14 @@
         }
     ],
     "autoload": {
-        "classmap": ["lib"]
+	"psr-4": {
+            "jdorn\\SqlFormatter\\": "src/"
+        }
+    },
+    "autoload-dev": {     
+        "psr-4": {
+            "jdorn\\SqlFormatter\\Tests\\": "tests/"
+        }
     },
     "extra": {
         "branch-alias": {
