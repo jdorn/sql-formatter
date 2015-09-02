@@ -1,0 +1,18 @@
+{
+    "alias": "sql-formatter.phar",
+    "chmod": "0755",
+    "compactors": [
+        "Herrera\\Box\\Compactor\\Json",
+        "Herrera\\Box\\Compactor\\Php"
+    ],
+    "directories": ["lib", "vendor/composer"],
+    "files": [
+        "LICENSE.txt",
+        "README.md",
+        "vendor/autoload.php"
+    ],
+    "git-version": "package_version",
+    "main": "bin/sql-formatter",
+    "output": "sql-formatter.phar",
+    "stub": true
+}
