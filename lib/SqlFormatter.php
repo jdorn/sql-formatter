@@ -140,6 +140,9 @@ class SqlFormatter
     // This flag tells us if queries need to be enclosed in <pre> tags
     public static $use_pre = true;
 
+    // This flag determines if keywords should be uppercased
+    public static $uppercase = false;
+
     // This flag tells us if SqlFormatted has been initialized
     protected static $init;
 
@@ -683,6 +686,13 @@ class SqlFormatter
                     }
                 }
             }
+
+            // Uppercase reserved words
+            if(self::$uppercase && in_array($token[self::TOKEN_TYPE],array(self::TOKEN_TYPE_RESERVED,self::TOKEN_TYPE_RESERVED_NEWLINE,self::TOKEN_TYPE_RESERVED_TOPLEVEL))){
+                $highlighted = strtoupper($highlighted);
+            }
+
+
 
             // If the token shouldn't have a space before it
             if ($token[self::TOKEN_VALUE] === '.' || $token[self::TOKEN_VALUE] === ',' || $token[self::TOKEN_VALUE] === ';') {
