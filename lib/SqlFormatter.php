@@ -426,7 +426,7 @@ class SqlFormatter
      *
      * @return String The SQL string with HTML styles and formatting wrapped in a <pre> tag
      */
-    public static function format($string, $highlight=true)
+    public static function format($string, $highlight=true, $indent_level=0)
     {
         // This variable will be populated with formatted html
         $return = '';
@@ -434,7 +434,6 @@ class SqlFormatter
         // Use an actual tab while formatting and then switch out with self::$tab at the end
         $tab = "\t";
 
-        $indent_level = 0;
         $newline = false;
         $inline_parentheses = false;
         $increase_special_indent = false;
