@@ -219,8 +219,12 @@ class SqlFormatter
             if ($string[0] === '-' || $string[0] === '#') {
                 $last = strpos($string, "\n");
                 $type = self::TOKEN_TYPE_COMMENT;
-            } else { // Comment until closing comment tag
-                $last = strpos($string, "*/", 2) + 2;
+            } else { // Comment until closing comment tag or end of query
+                if (strpos($string, "*/", 2)!== false) {
+                    $last = strpos($string, "*/", 2) + 2;
+                } else {
+                    $last = strlen($string);
+                }
                 $type = self::TOKEN_TYPE_BLOCK_COMMENT;
             }
 

@@ -93,6 +93,13 @@ class SqlFormatterTest extends PHPUnit_Framework_TestCase {
 		
 		$this->assertEquals($expected, $actual);
 	}
+
+    function testRemoveOpenComments() {
+   		$sql = "/*\nopen block comment";
+   		$actual = SqlFormatter::removeComments($sql);
+
+   		$this->assertEquals("", $actual);
+   	}
 	
 	function testCacheStats() {
 		$stats = SqlFormatter::getCacheStats();
