@@ -220,7 +220,7 @@ class SqlFormatter
                 $last = strpos($string, "\n");
                 $type = self::TOKEN_TYPE_COMMENT;
             } else { // Comment until closing comment tag or end of query
-                if (strpos($string, "*/", 2)!== false) {
+                if (strpos($string, "*/", 2) !== false) {
                     $last = strpos($string, "*/", 2) + 2;
                 } else {
                     $last = strlen($string);
