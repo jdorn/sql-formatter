@@ -309,7 +309,7 @@ class SqlFormatter
             }
         }
 
-        // A function must be suceeded by '('
+        // A function must be succeeded by '('
         // this makes it so "count(" is considered a function, but "count" alone is not
         $upper = strtoupper($string);
         // function
