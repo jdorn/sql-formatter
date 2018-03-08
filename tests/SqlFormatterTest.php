@@ -4,7 +4,9 @@ require __DIR__.'/../lib/SqlFormatter.php';
 // Force SqlFormatter to run in non-CLI mode for tests
 SqlFormatter::$cli = false;
 
-class SqlFormatterTest extends PHPUnit_Framework_TestCase {
+use PHPUnit\Framework\TestCase;
+
+class SqlFormatterTest extends TestCase {
 	protected $sqlData;
 	
 	/**
