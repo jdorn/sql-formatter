@@ -101,12 +101,12 @@ class SqlFormatterTest extends PHPUnit_Framework_TestCase {
    		$this->assertEquals("", $actual);
    	}
 
-    function testTrailingClosingComments() {
-   		$sql = "SELECT 1 */";
-   		$actual = SqlFormatter::removeComments($sql);
+	function testTrailingClosingComments() {
+		$sql = "SELECT 1 */";
+		$actual = SqlFormatter::removeComments($sql);
 
-   		$this->assertEquals("SELECT \n  1 */", $actual);
-   	}
+		$this->assertEquals("SELECT \n  1 */", $actual);
+	}
 
 	function testCacheStats() {
 		$stats = SqlFormatter::getCacheStats();
