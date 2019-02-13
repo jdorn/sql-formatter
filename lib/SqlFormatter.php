@@ -214,7 +214,7 @@ class SqlFormatter
         }
 
         // Comment
-        if ($string[0] === '#' || (isset($string[1])&&($string[0]==='-'&&$string[1]==='-') || ($string[0]==='/'&&$string[1]==='*'))) {
+        if ($string[0] === '#' || (isset($string[1])&&($string[0]==='-'&&$string[1]==='-') || ($string[0]==='/'&&isset($string[1])&&$string[1]==='*'))) {
             // Comment until end of line
             if ($string[0] === '-' || $string[0] === '#') {
                 $last = strpos($string, "\n");
