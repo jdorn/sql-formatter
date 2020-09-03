@@ -790,10 +790,11 @@ class SqlFormatter
      * Remove all comments from a SQL string
      *
      * @param String $string The SQL string
+     * @param bool $format format sql?
      *
      * @return String The SQL string without comments
      */
-    public static function removeComments($string)
+    public static function removeComments($string, $format = true)
     {
         $result = '';
 
@@ -807,7 +808,10 @@ class SqlFormatter
 
             $result .= $token[self::TOKEN_VALUE];
         }
-        $result = self::format( $result,false);
+
+        if ($format) {
+            $result = self::format( $result,false);
+        }
 
         return $result;
     }
