@@ -102,7 +102,8 @@ class SqlFormatter
     );
 
     // Punctuation that can be used as a boundary between other tokens
-    protected static $boundaries = array(',', ';',':', ')', '(', '.', '=', '<', '>', '+', '-', '*', '/', '!', '^', '%', '|', '&', '#');
+    const DEFAULT_BOUNDARIES = array(',', ';',':', ')', '(', '.', '=', '<', '>', '+', '-', '*', '/', '!', '^', '%', '|', '&', '#');
+    protected static $boundaries = self::DEFAULT_BOUNDARIES;
 
     // For HTML syntax highlighting
     // Styles applied to different token types
@@ -176,6 +177,12 @@ class SqlFormatter
             'entries'=>count(self::$token_cache),
             'size'=>strlen(serialize(self::$token_cache))
         );
+    }
+
+    public static function setBoundaries(array $boundaries)
+    {
+        self::$boundaries = $boundaries;
+        self::$regex_boundaries = '('.implode('|',array_map(array(__CLASS__, 'quote_regex'),self::$boundaries)).')';
     }
 
     /**

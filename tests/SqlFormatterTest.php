@@ -114,6 +114,7 @@ class SqlFormatterTest extends PHPUnit_Framework_TestCase {
 
 	public function testSynapseTempTables() {
         // In Azure Synapse is # char reserved for temp tables, not for comments
+        SqlFormatter::setBoundaries(array_diff(SqlFormatter::DEFAULT_BOUNDARIES, ['#']));
         SqlFormatter::$comment_tokens = [
             ['--'],
         ];
@@ -122,7 +123,7 @@ class SqlFormatterTest extends PHPUnit_Framework_TestCase {
         $sqlWithComment = "-- This is comment\n" . $sql;
         $expected = <<<SQL
 SELECT 
-  * INTO # temp_table 
+  * INTO #temp_table 
 FROM 
   SOURCE_TABLE;
 SQL;
