@@ -5,6 +5,12 @@ A lightweight php class for formatting sql statements.
 
 It can automatically indent and add line breaks in addition to syntax highlighting.
 
+For local development run:
+```
+docker run --rm -it -v $(pwd):/app --entrypoint "" prooph/composer:5.6 composer install
+docker run --rm -it -v $(pwd):/app --entrypoint "" prooph/composer:5.6 ./vendor/bin/phpunit
+```
+
 History
 ============
 
