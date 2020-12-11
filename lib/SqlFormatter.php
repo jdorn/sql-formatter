@@ -123,7 +123,7 @@ class SqlFormatter
     public static $cli;
 
     // Comments
-    public static $commentTokens = [
+    public static $comment_tokens = [
         ['#'],
         ['--'],
         ['/*', '*/']
@@ -222,7 +222,7 @@ class SqlFormatter
 
         // Comment
         $found = false;
-        foreach (self::$commentTokens as $comment) {
+        foreach (self::$comment_tokens as $comment) {
             $start = $comment[0];
             $end = isset($comment[1]) ? $comment[1] : "\n";
             $found = substr($string, 0, strlen($start)) === $start;
