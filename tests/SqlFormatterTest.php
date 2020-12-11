@@ -117,7 +117,7 @@ class SqlFormatterTest extends PHPUnit_Framework_TestCase {
         SqlFormatter::$comment_tokens = [
             ['--'],
         ];
-        
+
         $sql = 'SELECT * INTO #temp_table FROM SOURCE_TABLE;';
         $sqlWithComment = "-- This is comment\n" . $sql;
         $expected = <<<SQL

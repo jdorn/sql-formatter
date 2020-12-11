@@ -233,11 +233,19 @@ class SqlFormatter
         if ($found) {
             /** @var string $start */
             /** @var string $end */
+            // Get position of the comment's end
             $endPos = strpos($string, $end, strlen($start));
-            $last = $endPos ?
-                ($endPos + ($end === "\n" ? 0 : strlen($end))) : strlen($string);
+            if (!$endPos) {
+                // If the end is not found at all, then we take the whole rest of the string.
+                $endPos = strlen($string);
+            } elseif ($end !== "\n" ) {
+                // If the end is NOT the new line, we must skip end characters
+                $endPos +=  strlen($end);
+            }
+
             return array(
-                self::TOKEN_VALUE => substr($string, 0, $last),
+                self::TOKEN_VALUE => substr($string, 0, $endPos),
+                // Comments that do not end with a new line are block comments.
                 self::TOKEN_TYPE  => $end === "\n" ? self::TOKEN_TYPE_COMMENT : self::TOKEN_TYPE_BLOCK_COMMENT
             );
         }
