@@ -1,5 +1,4 @@
 <?php
-require __DIR__.'/../lib/SqlFormatter.php';
 
 // Force SqlFormatter to run in non-CLI mode for tests
 SqlFormatter::$cli = false;
@@ -112,6 +111,25 @@ class SqlFormatterTest extends PHPUnit_Framework_TestCase {
 		$stats = SqlFormatter::getCacheStats();
 		$this->assertGreaterThan(1,$stats['hits']);
 	}
+
+	public function testSynapseTempTables() {
+        // In Azure Synapse is # char reserved for temp tables, not for comments
+        SqlFormatter::$comment_tokens = [
+            ['--'],
+        ];
+
+        $sql = 'SELECT * INTO #temp_table FROM SOURCE_TABLE;';
+        $sqlWithComment = "-- This is comment\n" . $sql;
+        $expected = <<<SQL
+SELECT 
+  * INTO # temp_table 
+FROM 
+  SOURCE_TABLE;
+SQL;
+
+        $this->assertEquals($expected, SqlFormatter::removeComments($sql));
+        $this->assertEquals($expected, SqlFormatter::removeComments($sqlWithComment));
+    }
 
 	function formatHighlightData() {
 		$formatHighlightData = explode("\n\n",file_get_contents(__DIR__."/format-highlight.html"));
