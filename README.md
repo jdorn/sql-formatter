@@ -39,7 +39,7 @@ echo SqlFormatter::format($query);
 
 Output:
 
-![](http://jdorn.github.com/sql-formatter/format-highlight.png)
+![](https://jdorn.github.io/sql-formatter/format-highlight.png)
 
 Formatting Only
 -------------------------
@@ -55,7 +55,7 @@ echo SqlFormatter::format($query, false);
 
 Output:
 
-![](http://jdorn.github.com/sql-formatter/format.png)
+![](https://jdorn.github.io/sql-formatter/format.png)
 
 Syntax Highlighting Only
 -------------------------
@@ -73,7 +73,7 @@ echo SqlFormatter::highlight($query);
 
 Output:
 
-![](http://jdorn.github.com/sql-formatter/highlight.png)
+![](https://jdorn.github.io/sql-formatter/highlight.png)
 
 Compress Query
 --------------------------
