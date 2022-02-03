@@ -104,6 +104,9 @@ class SqlFormatter
     // Punctuation that can be used as a boundary between other tokens
     protected static $boundaries = array(',', ';',':', ')', '(', '.', '=', '<', '>', '+', '-', '*', '/', '!', '^', '%', '|', '&', '#');
 
+    // Postgresql array-operators
+    protected static $pgsql_arrayoperators = array("<@", "@>");
+
     // For HTML syntax highlighting
     // Styles applied to different token types
     public static $quote_attributes = 'style="color: blue;"';
@@ -149,6 +152,7 @@ class SqlFormatter
     protected static $regex_reserved_newline;
     protected static $regex_reserved_toplevel;
     protected static $regex_function;
+    protected static $regex_pgsql_arrays;
 
     // Cache variables
     // Only tokens shorter than this size will be cached.  Somewhere between 10 and 20 seems to work well for most cases.
@@ -189,6 +193,8 @@ class SqlFormatter
         self::$regex_reserved_toplevel = str_replace(' ','\\s+','('.implode('|',array_map(array(__CLASS__, 'quote_regex'),self::$reserved_toplevel)).')');
         self::$regex_reserved_newline = str_replace(' ','\\s+','('.implode('|',array_map(array(__CLASS__, 'quote_regex'),self::$reserved_newline)).')');
 
+        self::$regex_pgsql_arrays = '('.implode('|', array_map(array(__CLASS__, 'quote_regex'), self::$pgsql_arrayoperators)).')';
+    
         self::$regex_function = '('.implode('|',array_map(array(__CLASS__, 'quote_regex'),self::$functions)).')';
 
         self::$init = true;
@@ -272,6 +278,14 @@ class SqlFormatter
                 self::TOKEN_VALUE => $matches[1],
                 self::TOKEN_TYPE=>self::TOKEN_TYPE_NUMBER
             );
+        }
+
+         // Postgresql specials, we don't want to touch them
+         if (preg_match('/^('.self::$regex_pgsql_arrays.')/', $string, $matches)) {
+            return array(
+                self::TOKEN_VALUE => $matches[1],
+                self::TOKEN_TYPE  => self::TOKEN_TYPE_BOUNDARY
+            );  
         }
 
         // Boundary Character (punctuation and symbols)
