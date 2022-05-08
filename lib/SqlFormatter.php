@@ -713,7 +713,7 @@ class SqlFormatter
             $return .= $highlighted.' ';
 
             // If the token shouldn't have a space after it
-            if ($token[self::TOKEN_VALUE] === '(' || $token[self::TOKEN_VALUE] === '.') {
+            if (in_array($token[self::TOKEN_VALUE], ['(', '.', 'n','N'], true)
                 $return = rtrim($return,' ');
             }
 
